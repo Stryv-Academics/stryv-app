@@ -1,35 +1,36 @@
 import AttendanceChart from "@/components/AttendanceChart";
 import CountChart from "@/components/CountChart";
 import UserCard from "@/components/UserCard";
+import Logo from "@/components/Welcome";
 
 const AdminPage = () => {
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
-      {/* LEFT */}
+      {/*LEFT*/}
       <div className="w-full lg:w-2/3 flex flex-col gap-8">
-        {/* USER CARDS */}
+        {/*USER CARDS*/}
         <div className="flex gap-4 justify-between flex-wrap">
-          <UserCard type="student" />
+          <Logo type="student" />
           <UserCard type="teacher" />
           <UserCard type="parent" />
           <UserCard type="staff" />
         </div>
-        {/* MIDDLE CHARTS */}
+        {/*MIDDLE CHARTS*/}
         <div className="flex gap-4 flex-col lg:flex-row">
-          {/* COUNT CHART */}
+          {/*COUNT CHART*/}
           <div className="w-full lg:w-1/3 h-[450px]">
             <CountChart />
           </div>
-          {/* ATTENDANCE CHART */}
+          {/*ATTENDANCE CHART*/}
           <div className="w-full lg:w-2/3 h-[450px]">
             <AttendanceChart />
           </div>
         </div>
-        {/* BOTTOM CHARTS */}
-        <div className="w-full h-[500px]"></div>
+        {/*BOTTOM CHARTS*/}
+        <div className=""></div>
       </div>
-      {/* RIGHT */}
-      <div className="w-full lg:w-1/3">R</div>
+      {/*RIGHT*/}
+      <div className="w-full lg:w-1/3">r</div>
     </div>
   );
 };

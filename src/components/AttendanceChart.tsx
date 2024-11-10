@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import {
   BarChart,
@@ -15,28 +16,28 @@ import {
 const data = [
   {
     name: "Mon",
-    present: 60,
-    absent: 34,
+    Present: 60,
+    Absent: 20,
   },
   {
     name: "Tue",
-    present: 45,
-    absent: 23,
+    Present: 30,
+    Absent: 18,
   },
   {
     name: "Wed",
-    present: 45,
-    absent: 12,
+    Present: 20,
+    Absent: 90,
   },
   {
-    name: "Thur",
-    present: 45,
-    absent: 32,
+    name: "Thu",
+    Present: 80,
+    Absent: 38,
   },
   {
     name: "Fri",
-    present: 60,
-    absent: 35,
+    Present: 10,
+    Absent: 40,
   },
 ];
 
@@ -49,14 +50,14 @@ const AttendanceChart = () => {
       </div>
       <ResponsiveContainer width="100%" height="90%">
         <BarChart width={500} height={300} data={data} barSize={20}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="dd" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ddd" />
           <XAxis
             dataKey="name"
             axisLine={false}
-            tick={{ fill: "d1d5db" }}
+            tick={{ fill: "#d1d5db" }}
             tickLine={false}
           />
-          <YAxis axisLine={false} tick={{ fill: "#d1d5db" }} tickLine={false} />
+          <YAxis />
           <Tooltip
             contentStyle={{ borderRadius: "10px", borderColor: "lightgray" }}
           />
@@ -66,13 +67,13 @@ const AttendanceChart = () => {
             wrapperStyle={{ paddingTop: "20px", paddingBottom: "40px" }}
           />
           <Bar
-            dataKey="present"
-            fill="#FAE27C"
+            dataKey="Present"
+            fill="#EDF9FD"
             legendType="circle"
             radius={[10, 10, 0, 0]}
           />
           <Bar
-            dataKey="absent"
+            dataKey="Absent"
             fill="#C3EBFA"
             legendType="circle"
             radius={[10, 10, 0, 0]}
