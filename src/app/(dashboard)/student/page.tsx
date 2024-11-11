@@ -1,10 +1,8 @@
-import AttendanceChart from "@/components/AttendanceChart";
-import CountChart from "@/components/CountChart";
 import Progress from "@/components/Progress";
 import Calendar from "@/components/Calendar";
-import Appointments from "@/components/Appointments";
 import Welcome from "@/components/Welcome";
 import Tutors from "@/components/Tutors";
+import Lessons from "@/components/Lessons";
 
 const StudentPage = () => {
   return (
@@ -14,7 +12,7 @@ const StudentPage = () => {
         {/*USER CARDS*/}
         <div className="flex gap-4 justify-between flex-wrap flex-col">
           <Welcome type="student" />
-          <Appointments />
+          <Lessons />
           <Tutors />
         </div>
       </div>
