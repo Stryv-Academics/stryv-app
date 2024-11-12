@@ -8,7 +8,6 @@ const menuItems = [
       {
         icon: "/home.png",
         label: "Home",
-        href: "/",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
@@ -84,7 +83,7 @@ const Menu = ({ type }: { type: string }) => {
             </span>
             {i.items.map((item) => (
               <Link
-                href={item.href}
+                href={item.href || "#"} // Default href to "#" if none is provided
                 key={item.label}
                 className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
               >
@@ -103,7 +102,7 @@ const Menu = ({ type }: { type: string }) => {
             </span>
             {i.items.map((item) => (
               <Link
-                href={item.href}
+                href={item.href || "#"} // Default href to "#" if none is provided
                 key={item.label}
                 className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
               >
@@ -117,6 +116,18 @@ const Menu = ({ type }: { type: string }) => {
 
       <div className="my-4 h-px bg-gray-300" />
 
+      {/* Home Link */}
+      <Link
+        href={type} // Use the dynamic homeHref passed to the Menu component
+        className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
+      >
+        <Image src="/home.png" alt="Home" width={20} height={20} />
+        <span className="hidden lg:block">Home</span>
+      </Link>
+
+      <div className="my-4 h-px bg-gray-300" />
+
+      {/* Profile Section */}
       <div className="flex items-center gap-4 justify-start w-full mt-5">
         <Image
           src="/avatar.png"
@@ -129,7 +140,7 @@ const Menu = ({ type }: { type: string }) => {
           <span className="text-xs leading-3 font-medium">
             Zach Berkenkotter
           </span>
-          <span className="text-[10px] text-gray-500">{type}</span>
+          <span className="text-[10px] text-gray-500">student</span>
           <span className="text-[10px] text-gray-500">...</span>
         </div>
       </div>

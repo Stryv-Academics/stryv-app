@@ -1,13 +1,31 @@
+"use client";
+
 import Image from "next/image";
 
-const Logo = ({ type }: { type: string }) => {
+interface WelcomeProps {
+  type: string;
+  username?: string;
+}
+
+const Welcome: React.FC<WelcomeProps> = ({ username = "zach.berk" }) => {
   return (
-    <div className="rounded-2xl bg-gray-100 p-5 flex-1">
-      <h1 className="text-[20px] text-start font-semibold">
-        Welcome, zach.berk!
-      </h1>
+    <div className="p-4 flex-1">
+      <div className="rounded-2xl border border-gray-300 bg-white p-6">
+        <div className="flex items-center gap-4">
+          <Image
+            src="/avatar.png"
+            alt="Profile"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+          <h1 className="text-xl font-semibold text-gray-900">
+            Welcome, {username}!
+          </h1>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Logo;
+export default Welcome;

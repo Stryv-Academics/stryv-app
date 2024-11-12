@@ -18,11 +18,10 @@ export default function DashboardLayout({
         >
           <span className="hidden lg:block"></span>
         </Link>
-        <Menu type={"Student"} />
+        <Menu type={"string"} />
       </div>
       {/* Right */}
       <div className="w-[75%] md:w-[75%] lg:w-[75%] xlg:w-[75%] bg-white overflow-scroll">
-        <Navbar />
         {children}
       </div>
     </div>
