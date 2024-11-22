@@ -7,7 +7,7 @@ interface WelcomeProps {
   username?: string;
 }
 
-const Welcome: React.FC<WelcomeProps> = ({ username = "zach.berk" }) => {
+const Welcome: React.FC<WelcomeProps> = ({ username = "Zach" }) => {
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">

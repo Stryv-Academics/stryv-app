@@ -8,6 +8,7 @@ const menuItems = [
       {
         icon: "/home.png",
         label: "Home",
+        href: "/",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
@@ -113,17 +114,6 @@ const Menu = ({ type }: { type: string }) => {
           </div>
         ))}
       </div>
-
-      <div className="my-4 h-px bg-gray-300" />
-
-      {/* Home Link */}
-      <Link
-        href={type} // Use the dynamic homeHref passed to the Menu component
-        className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
-      >
-        <Image src="/home.png" alt="Home" width={20} height={20} />
-        <span className="hidden lg:block">Home</span>
-      </Link>
 
       <div className="my-4 h-px bg-gray-300" />
 
