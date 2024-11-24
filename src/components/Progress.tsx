@@ -1,21 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { Calendar, TrendingUp, Award } from "lucide-react";
 
 const Progress = () => {
-  const [loading] = useState(false);
-
-  if (loading) {
-    return (
-      <div className="p-4 flex-1 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded-full w-64 mb-4"></div>
-        <div className="h-40 bg-gray-200 rounded-2xl"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 flex-1">
       <div className="flex justify-between items-center mb-4">
