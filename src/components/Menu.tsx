@@ -9,31 +9,31 @@ const menuItems = [
         icon: "/home.png",
         label: "Home",
         href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/calendar.png",
         label: "Calendar",
         href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/profile.png",
         label: "Profile",
-        href: "/list/teachers",
-        visible: ["admin", "teacher"],
+        href: "/profile",
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/message.png",
         label: "Messages",
         href: "/list/students",
-        visible: ["admin", "teacher"],
+        visible: ["admin", "tutor"],
       },
       {
         icon: "/setting.png",
         label: "Settings",
         href: "/list/settings",
-        visible: ["admin", "teacher"],
+        visible: ["admin", "tutor"],
       },
     ],
   },
@@ -47,19 +47,19 @@ const otherItems = [
         icon: "/profile.png",
         label: "Help/FAQ",
         href: "/help",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/phone.png",
         label: "Contact Us",
         href: "/contact",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/logout.png",
         label: "Logout",
-        href: "/logout",
-        visible: ["admin", "teacher", "student", "parent"],
+        href: "/auth/logout",
+        visible: ["admin", "tutor", "student", "parent"],
       },
     ],
   },
@@ -130,7 +130,7 @@ const Menu = ({ type }: { type: string }) => {
           <span className="text-xs leading-3 font-medium">
             Zach Berkenkotter
           </span>
-          <span className="text-[10px] text-gray-500">student</span>
+          <span className="text-[10px] text-gray-500">Student</span>
           <span className="text-[10px] text-gray-500">...</span>
         </div>
       </div>

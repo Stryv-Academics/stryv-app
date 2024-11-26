@@ -1,4 +1,4 @@
-import AccountForm from "./AccountForm";
+import ProfileForm from "./ProfileForm";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Account() {
@@ -8,5 +8,5 @@ export default async function Account() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <AccountForm user={user} />;
+  return <ProfileForm user={user} />;
 }
