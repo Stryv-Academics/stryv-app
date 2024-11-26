@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import MenuItem from "./MenuItem";
 
 const menuItems = [
   {
@@ -8,31 +9,31 @@ const menuItems = [
       {
         icon: "/home.png",
         label: "Home",
-        href: "/",
+        action: "/",
         visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/calendar.png",
         label: "Calendar",
-        href: "/",
+        action: "/",
         visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/profile.png",
         label: "Profile",
-        href: "/profile",
+        action: "/profile",
         visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/message.png",
         label: "Messages",
-        href: "/list/students",
+        action: "/list/students",
         visible: ["admin", "tutor"],
       },
       {
         icon: "/setting.png",
         label: "Settings",
-        href: "/list/settings",
+        action: "/list/settings",
         visible: ["admin", "tutor"],
       },
     ],
@@ -46,19 +47,19 @@ const otherItems = [
       {
         icon: "/profile.png",
         label: "Help/FAQ",
-        href: "/help",
+        action: "/help",
         visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/phone.png",
         label: "Contact Us",
-        href: "/contact",
+        action: "/contact",
         visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/logout.png",
         label: "Logout",
-        href: "/auth/logout",
+        action: "/auth/logout",
         visible: ["admin", "tutor", "student", "parent"],
       },
     ],
@@ -83,14 +84,7 @@ const Menu = ({ type }: { type: string }) => {
               {i.title}
             </span>
             {i.items.map((item) => (
-              <Link
-                href={item.href || "#"} // Default href to "#" if none is provided
-                key={item.label}
-                className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
-              >
-                <Image src={item.icon} alt="" width={20} height={20} />
-                <span className="hidden lg:block">{item.label}</span>
-              </Link>
+              <MenuItem item={item} />
             ))}
           </div>
         ))}
@@ -102,14 +96,7 @@ const Menu = ({ type }: { type: string }) => {
               {i.title}
             </span>
             {i.items.map((item) => (
-              <Link
-                href={item.href || "#"} // Default href to "#" if none is provided
-                key={item.label}
-                className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2"
-              >
-                <Image src={item.icon} alt="" width={20} height={20} />
-                <span className="hidden lg:block">{item.label}</span>
-              </Link>
+              <MenuItem item={item} />
             ))}
           </div>
         ))}
