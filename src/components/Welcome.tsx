@@ -16,7 +16,7 @@ const Welcome = ({ user }: { user: User | null }) => {
     if (!user) {
       setError("No user found.");
       setLoading(false);
-      return; // If there's no user, stop the function
+      return;
     }
 
     try {
@@ -30,12 +30,11 @@ const Welcome = ({ user }: { user: User | null }) => {
         .single();
 
       if (error) {
-        console.log(error);
         throw error;
       }
 
       if (data) {
-        setFirstname(data.first_name); // Update the state with the fetched first name
+        setFirstname(data.first_name);
       }
     } catch (error) {
       alert("Error loading user data!");
@@ -44,12 +43,10 @@ const Welcome = ({ user }: { user: User | null }) => {
     }
   }, [user, supabase]);
 
-  // Fetch the first name when the user changes
   useEffect(() => {
     getFirstName();
   }, [user, getFirstName]);
 
-  // Show a loading state while fetching data
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -80,24 +77,22 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
 
-  // Function to get the current logged-in user
   const getUser = async () => {
     const { data, error } = await supabase.auth.getUser();
 
     if (error) {
       console.error("Error fetching user:", error);
     } else {
-      setUser(data.user); // Set the user object
+      setUser(data.user);
     }
   };
 
   useEffect(() => {
-    getUser(); // Fetch user when the component mounts
+    getUser();
   }, []);
 
-  // If user is still loading or not found, show loading state
-  if (user === null) {
-    return <div>Loading user data...</div>;
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
   return <Welcome user={user} />;
