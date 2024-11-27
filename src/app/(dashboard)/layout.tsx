@@ -1,13 +1,18 @@
 import Link from "next/link";
-import Image from "next/image";
 import Menu from "@/components/Menu";
-import Navbar from "@/components/Navbar";
+import { createClient } from "@/utils/supabase/server";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase
+    .from("profiles")
+    .select("role, first_name, last_name")
+    .single();
+
   return (
     <div className="h-screen flex">
       {/* Left */}
@@ -18,7 +23,8 @@ export default function DashboardLayout({
         >
           <span className="hidden lg:block"></span>
         </Link>
-        <Menu type={"string"} />
+        {/* Need to figure out how to render this */}
+        <Menu userData={userData} />
       </div>
       {/* Right */}
       <div className="w-[75%] md:w-[75%] lg:w-[75%] xlg:w-[75%] bg-white overflow-scroll">

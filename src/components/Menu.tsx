@@ -1,6 +1,13 @@
 import Image from "next/image";
-import Link from "next/link";
 import MenuItem from "./MenuItem";
+
+interface MenuProps {
+  userData: {
+    role: string;
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
+}
 
 const menuItems = [
   {
@@ -28,13 +35,13 @@ const menuItems = [
         icon: "/message.png",
         label: "Messages",
         action: "/list/students",
-        visible: ["admin", "tutor"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
       {
         icon: "/setting.png",
         label: "Settings",
         action: "/list/settings",
-        visible: ["admin", "tutor"],
+        visible: ["admin", "tutor", "student", "parent"],
       },
     ],
   },
@@ -66,7 +73,14 @@ const otherItems = [
   },
 ];
 
-const Menu = ({ type }: { type: string }) => {
+const Menu: React.FC<MenuProps> = ({ userData }) => {
+  const role = userData?.role ?? "";
+  const firstName = userData?.first_name ?? "";
+  const lastName = userData?.last_name ?? "";
+
+  const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
+  const fullName = `${firstName} ${lastName}`.trim();
+
   return (
     <div>
       {/* Logo Section */}
@@ -83,9 +97,11 @@ const Menu = ({ type }: { type: string }) => {
             <span className="hidden lg:block text-gray-400 font-light my-4">
               {i.title}
             </span>
-            {i.items.map((item) => (
-              <MenuItem item={item} />
-            ))}
+            {i.items
+              .filter((item) => item.visible.includes(role ?? ""))
+              .map((item) => (
+                <MenuItem item={item} />
+              ))}
           </div>
         ))}
         <div className="my-2 h-px bg-gray-300" />
@@ -95,9 +111,11 @@ const Menu = ({ type }: { type: string }) => {
             <span className="hidden lg:block text-gray-400 font-light my-4">
               {i.title}
             </span>
-            {i.items.map((item) => (
-              <MenuItem item={item} />
-            ))}
+            {i.items
+              .filter((item) => item.visible.includes(role ?? ""))
+              .map((item) => (
+                <MenuItem item={item} />
+              ))}
           </div>
         ))}
       </div>
@@ -114,10 +132,8 @@ const Menu = ({ type }: { type: string }) => {
           className="rounded-full"
         />
         <div className="flex flex-col items-start">
-          <span className="text-xs leading-3 font-medium">
-            Zach Berkenkotter
-          </span>
-          <span className="text-[10px] text-gray-500">Student</span>
+          <span className="text-xs leading-3 font-medium">{fullName}</span>
+          <span className="text-[10px] text-gray-500">{displayRole}</span>
           <span className="text-[10px] text-gray-500">...</span>
         </div>
       </div>
