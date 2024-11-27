@@ -2,82 +2,81 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 
-const pullData = ({ user }: { user: User | null }) => {
+const UserDataFetcher = () => {
     const supabase = createClient();
     const [loading, setLoading] = useState(true);
-    const [first_name, setFirstname] = useState<string | null>(null);
-    const [last_name, setLastname] = useState<string | null>(null);
-    const [username, setUsername] = useState<string | null>(null);
-    const [role, setRole] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-  
-    // Fetch the first name from the Supabase database
-    const getData = useCallback(async () => {
-      if (!user) {
-        setError("No user found.");
-        setLoading(false);
-        return;
-      }
-  
-      try {
-        setLoading(true);
-        setError(null);
-  
-        const { data, error } = await supabase
-          .from("profiles")
-          .select(`first_name, last_name, username, role`)
-          .eq("id", user?.id)
-          .single();
-  
-        if (error) {
-          throw error;
-        }
-  
-        if (data) {
-          setFirstname(data.first_name);
-          setLastname(data.last_name);
-          setUsername(data.username);
-          setRole(data.role);
-        }
-      } catch (error) {
-        alert("Error loading user data!");
-      } finally {
-        setLoading(false);
-      }
-    }, [user, supabase]);
-  
-    useEffect(() => {
-      getData();
-    }, [user, getData]);
-  
-    if (loading) {
-      return <div>Loading...</div>;
-    }  
-};
-  
-const App = () => {
     const [user, setUser] = useState<User | null>(null);
-    const supabase = createClient();
+    const [userData, setUserData] = useState<{
+        first_name: string | null;
+        last_name: string | null;
+        username: string | null;
+        role: string | null;
+    } | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const getUser = async () => {
-        const { data, error } = await supabase.auth.getUser();
-
-        if (error) {
-        console.error("Error fetching user:", error);
-        } else {
-        setUser(data.user);
+    const fetchUser = useCallback(async () => {
+        try {
+            const { data, error } = await supabase.auth.getUser();
+            if (error) {
+                console.error("Error fetching user:", error);
+                setError("Error fetching user.");
+            } else {
+                setUser(data.user);
+            }
+        } catch (err) {
+            setError("Unexpected error occurred while fetching user.");
+            console.error(err);
         }
-    };
+    }, [supabase]);
+
+    const fetchUserData = useCallback(async () => {
+        if (!user) {
+            setError("No user found.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const { data, error } = await supabase
+                .from("profiles")
+                .select(`first_name, last_name, username, role`)
+                .eq("id", user.id)
+                .single();
+
+            if (error) {
+                throw error;
+            }
+
+            if (data) {
+                setUserData(data);
+            }
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            setError("Error loading user data.");
+        } finally {
+            setLoading(false);
+        }
+    }, [user, supabase]);
 
     useEffect(() => {
-        getUser();
-    }, []);
+        fetchUser();
+    }, [fetchUser]);
 
-    if (!user) {
-        return <div>Loading...</div>;
-    }
+    useEffect(() => {
+        if (user) {
+            fetchUserData();
+        }
+    }, [user, fetchUserData]);
 
-    return <pullData user={user} />;
+    return {
+      loading,
+      error,
+      user,
+      userData,
+    };
 };
-  
-export default App;
+
+export default UserDataFetcher;
