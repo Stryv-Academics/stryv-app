@@ -12,6 +12,7 @@ export default async function DashboardLayout({
     .from("profiles")
     .select("role, first_name, last_name")
     .single();
+  console.log(userData);
 
   return (
     <div className="h-screen flex">

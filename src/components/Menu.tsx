@@ -3,7 +3,7 @@ import MenuItem from "./MenuItem";
 
 interface MenuProps {
   userData: {
-    role: string;
+    role: string | null;
     first_name: string | null;
     last_name: string | null;
   } | null;
@@ -74,9 +74,9 @@ const otherItems = [
 ];
 
 const Menu: React.FC<MenuProps> = ({ userData }) => {
-  const role = userData?.role ?? "";
-  const firstName = userData?.first_name ?? "";
-  const lastName = userData?.last_name ?? "";
+  const role = userData?.role ?? "student";
+  const firstName = userData?.first_name ?? "Guest";
+  const lastName = userData?.last_name ?? "guest";
 
   const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
   const fullName = `${firstName} ${lastName}`.trim();

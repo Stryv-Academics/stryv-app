@@ -1,11 +1,7 @@
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function Welcome({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function Welcome() {
   const supabase = await createClient();
   const { data: userData } = await supabase
     .from("profiles")
