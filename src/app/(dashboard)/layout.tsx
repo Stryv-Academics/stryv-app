@@ -1,19 +1,14 @@
 import Link from "next/link";
 import Menu from "@/components/Menu";
-import { createClient } from "@/utils/supabase/server";
+import pullData from "../../components/pullData";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase
-    .from("profiles")
-    .select("role, first_name, last_name")
-    .single();
+  const userData = await pullData();
   console.log(userData);
-
   return (
     <div className="h-screen flex">
       {/* Left */}

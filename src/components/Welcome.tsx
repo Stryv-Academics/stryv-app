@@ -1,12 +1,8 @@
 import Image from "next/image";
-import { createClient } from "@/utils/supabase/server";
+import pullData from "./pullData";
 
 export default async function Welcome() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase
-    .from("profiles")
-    .select("first_name")
-    .single();
+  const userData = await pullData();
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">
