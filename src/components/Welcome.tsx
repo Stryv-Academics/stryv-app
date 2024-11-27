@@ -1,13 +1,16 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
 import Image from "next/image";
-import PullData from "../app/pullData"
+import { createClient } from "@/utils/supabase/server";
 
-const Welcome = () => {
-  const { loading, error, userData } = PullData();
+export default async function Welcome({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase
+    .from("profiles")
+    .select("first_name")
+    .single();
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">
@@ -29,5 +32,3 @@ const Welcome = () => {
     </div>
   );
 };
-
-export default Welcome;
