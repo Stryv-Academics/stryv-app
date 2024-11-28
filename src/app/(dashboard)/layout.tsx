@@ -7,7 +7,19 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userData = await pullData();
+  const rawUserData = await pullData("profiles", ["role", "first_name", "last_name"]);
+  const userData =
+    rawUserData &&
+    typeof rawUserData === "object" &&
+    "role" in rawUserData &&
+    "first_name" in rawUserData &&
+    "last_name" in rawUserData
+      ? (rawUserData as {
+          role: string | null;
+          first_name: string | null;
+          last_name: string | null;
+        })
+      : null;
   console.log(userData);
   return (
     <div className="h-screen flex">

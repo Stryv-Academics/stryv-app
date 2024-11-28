@@ -6,7 +6,19 @@ import Lessons from "@/components/Lessons";
 import pullData from "../../../components/pullData";
 
 const StudentPage = async () => {
-  const userData = await pullData();
+  const rawUserData = await pullData("profiles", ["role", "first_name", "last_name"]);
+  const userData =
+    rawUserData &&
+    typeof rawUserData === "object" &&
+    "role" in rawUserData &&
+    "first_name" in rawUserData &&
+    "last_name" in rawUserData
+      ? (rawUserData as {
+          role: string | null;
+          first_name: string | null;
+          last_name: string | null;
+        })
+      : null;
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
       {/*LEFT*/}

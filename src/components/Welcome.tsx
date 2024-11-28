@@ -1,12 +1,14 @@
 import Image from "next/image";
 
-interface UserData {
-  first_name?: string;
-  last_name?: string;
-  role?: string;
+interface WelcomeProps {
+  userData: {
+    role: string | null;
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
-export default function Welcome({ userData } : { userData : UserData | null }) {
+export default function Welcome({ userData } : WelcomeProps) {
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">

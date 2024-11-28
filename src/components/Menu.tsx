@@ -73,7 +73,7 @@ const otherItems = [
   },
 ];
 
-const Menu: React.FC<MenuProps> = ({ userData }) => {
+export default function Menu({ userData }: MenuProps){
   const role = userData?.role ?? "student";
   const firstName = userData?.first_name ?? "Guest";
   const lastName = userData?.last_name ?? "guest";
@@ -140,5 +140,3 @@ const Menu: React.FC<MenuProps> = ({ userData }) => {
     </div>
   );
 };
-
-export default Menu;

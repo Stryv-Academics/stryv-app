@@ -1,10 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 
-export default async function pullData() {
+export default async function pullData(table: string, filter: string[]) {
     const supabase = await createClient();
     const { data: userData } = await supabase
-        .from("profiles")
-        .select("role, first_name, last_name")
+        .from(table)
+        .select(filter.join(", ")) 
         .single();
     return userData;
 }
