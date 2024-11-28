@@ -1,8 +1,12 @@
 import Image from "next/image";
-import pullData from "./pullData";
 
-export default async function Welcome() {
-  const userData = await pullData();
+interface UserData {
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+}
+
+export default function Welcome({ userData } : { userData : UserData | null }) {
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">

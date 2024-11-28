@@ -1,63 +1,41 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { type User } from "@supabase/supabase-js";
 
-export default function AccountForm({ user }: { user: User | null }) {
-  const supabase = createClient();
-  const [loading, setLoading] = useState(true);
-  const [first_name, setFirstname] = useState<string | null>(null);
-  const [last_name, setLastname] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-
-  const getProfile = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      const { data, error, status } = await supabase
-        .from("profiles")
-        .select(`first_name, last_name, username`)
-        .eq("id", user?.id)
-        .single();
-
-      if (error && status !== 406) {
-        console.log(error);
-        throw error;
-      }
-
-      if (data) {
-        setFirstname(data.first_name);
-        setLastname(data.last_name);
-        setUsername(data.username);
-      }
-    } catch (error) {
-      alert("Error loading user data!");
-    } finally {
-      setLoading(false);
-    }
-  }, [user, supabase]);
-
-  useEffect(() => {
-    getProfile();
-  }, [user, getProfile]);
-
-  async function updateProfile({
-    first_name,
-    last_name,
-    username,
-  }: {
+export default function AccountForm({
+  user,
+  profile,
+}: {
+  user: User | null;
+  profile: {
     first_name: string | null;
     last_name: string | null;
     username: string | null;
-  }) {
+  } | null;
+}) {
+  const supabase = createClient();
+
+  const [loading, setLoading] = useState(false);
+  const [firstName, setFirstName] = useState<string | null>(
+    profile?.first_name || ""
+  );
+  const [lastName, setLastName] = useState<string | null>(
+    profile?.last_name || ""
+  );
+  const [username, setUsername] = useState<string | null>(
+    profile?.username || ""
+  );
+
+  async function updateProfile() {
     try {
       setLoading(true);
 
       const { error } = await supabase.from("profiles").upsert({
         id: user?.id as string,
-        first_name,
-        last_name,
-        username,
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
         updated_at: new Date().toISOString(),
       });
       if (error) {
@@ -108,8 +86,8 @@ export default function AccountForm({ user }: { user: User | null }) {
           <input
             id="firstName"
             type="text"
-            value={first_name || ""}
-            onChange={(e) => setFirstname(e.target.value)}
+            value={firstName || ""}
+            onChange={(e) => setFirstName(e.target.value)}
             className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -123,8 +101,8 @@ export default function AccountForm({ user }: { user: User | null }) {
           <input
             id="lastName"
             type="text"
-            value={last_name || ""}
-            onChange={(e) => setLastname(e.target.value)}
+            value={lastName || ""}
+            onChange={(e) => setLastName(e.target.value)}
             className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -147,7 +125,7 @@ export default function AccountForm({ user }: { user: User | null }) {
         <div>
           <button
             className="button primary block w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-            onClick={() => updateProfile({ first_name, last_name, username })}
+            onClick={() => updateProfile()}
             disabled={loading}
           >
             {loading ? "Loading ..." : "Update"}

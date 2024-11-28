@@ -141,29 +141,4 @@ const Menu: React.FC<MenuProps> = ({ userData }) => {
   );
 };
 
-/* const Profile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
-
-  const getUser = async () => {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error) {
-      console.error("Error fetching user:", error);
-    } else {
-      setUser(data.user);
-    }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
-  return <Menu user={user} />;
-}; */
-
 export default Menu;
