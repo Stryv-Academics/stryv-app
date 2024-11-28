@@ -1,12 +1,14 @@
 import Link from "next/link";
 import Menu from "@/components/Menu";
-import pullData from "../../components/pullData";
+import fetchTableData from "@/services/userApis";
+import { Profile } from "@/types/profile";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+<<<<<<< Updated upstream
   const rawUserData = await pullData("profiles", ["role", "first_name", "last_name"]);
   const userData =
     rawUserData &&
@@ -21,6 +23,12 @@ export default async function DashboardLayout({
         })
       : null;
   console.log(userData);
+=======
+  const table = "profiles";
+  const fields = ["role", "first_name", "last_name"];
+  const userData = await fetchTableData<Profile>({ table, fields });
+
+>>>>>>> Stashed changes
   return (
     <div className="h-screen flex">
       {/* Left */}

@@ -1,5 +1,7 @@
+import { Profile } from "@/types/profile";
 import Image from "next/image";
 
+<<<<<<< Updated upstream
 interface WelcomeProps {
   userData: {
     role: string | null;
@@ -9,6 +11,9 @@ interface WelcomeProps {
 }
 
 export default function Welcome({ userData } : WelcomeProps) {
+=======
+export default function Welcome({ userData }: { userData: Profile }) {
+>>>>>>> Stashed changes
   return (
     <div className="p-4 flex-1">
       <div className="rounded-2xl border border-gray-300 bg-white p-6">
@@ -22,11 +27,11 @@ export default function Welcome({ userData } : WelcomeProps) {
           />
           <div>
             <h1 className="text-xl font-semibold text-gray-900">
-              Welcome, {userData?.first_name || "User"}!
+              Welcome, {userData.first_name || "User"}!
             </h1>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
