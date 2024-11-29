@@ -1,17 +1,16 @@
 import Link from "next/link";
 import Menu from "@/components/Menu";
-import { createClient } from "@/utils/supabase/server";
+import fetchTableData from "@/services/userApis";
+import { Profile } from "@/types/profile";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase
-    .from("profiles")
-    .select("role, first_name, last_name")
-    .single();
+  const table = "profiles";
+  const fields = ["role", "first_name", "last_name"];
+  const userData = await fetchTableData<Profile>({ table, fields });
 
   return (
     <div className="h-screen flex">

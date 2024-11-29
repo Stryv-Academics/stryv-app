@@ -2,30 +2,21 @@
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { type User } from "@supabase/supabase-js";
+import { Profile } from "@/types/profile";
 
-export default function AccountForm({
+export default function ProfileForm({
   user,
-  profile,
+  userData,
 }: {
   user: User | null;
-  profile: {
-    first_name: string | null;
-    last_name: string | null;
-    username: string | null;
-  } | null;
+  userData: Profile;
 }) {
   const supabase = createClient();
 
   const [loading, setLoading] = useState(false);
-  const [firstName, setFirstName] = useState<string | null>(
-    profile?.first_name || ""
-  );
-  const [lastName, setLastName] = useState<string | null>(
-    profile?.last_name || ""
-  );
-  const [username, setUsername] = useState<string | null>(
-    profile?.username || ""
-  );
+  const [firstName, setFirstName] = useState<string>(userData.first_name || "");
+  const [lastName, setLastName] = useState<string>(userData.last_name || "");
+  const [username, setUsername] = useState<string>(userData.username || "");
 
   async function updateProfile() {
     try {

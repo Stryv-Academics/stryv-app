@@ -1,13 +1,6 @@
 import Image from "next/image";
 import MenuItem from "./MenuItem";
-
-interface MenuProps {
-  userData: {
-    role: string;
-    first_name: string | null;
-    last_name: string | null;
-  } | null;
-}
+import { Profile } from "@/types/profile";
 
 const menuItems = [
   {
@@ -73,10 +66,10 @@ const otherItems = [
   },
 ];
 
-const Menu: React.FC<MenuProps> = ({ userData }) => {
-  const role = userData?.role ?? "";
-  const firstName = userData?.first_name ?? "";
-  const lastName = userData?.last_name ?? "";
+export default function Menu({ userData }: { userData: Profile }) {
+  const role = userData.role ?? "student";
+  const firstName = userData.first_name ?? "Guest";
+  const lastName = userData.last_name ?? "";
 
   const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
   const fullName = `${firstName} ${lastName}`.trim();
@@ -139,6 +132,4 @@ const Menu: React.FC<MenuProps> = ({ userData }) => {
       </div>
     </div>
   );
-};
-
-export default Menu;
+}
