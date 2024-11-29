@@ -1,26 +1,17 @@
 import Link from "next/link";
 import Menu from "@/components/Menu";
-import pullData from "../../components/pullData";
+import fetchTableData from "@/services/userApis";
+import { Profile } from "@/types/profile";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const rawUserData = await pullData("profiles", ["role", "first_name", "last_name"]);
-  const userData =
-    rawUserData &&
-    typeof rawUserData === "object" &&
-    "role" in rawUserData &&
-    "first_name" in rawUserData &&
-    "last_name" in rawUserData
-      ? (rawUserData as {
-          role: string | null;
-          first_name: string | null;
-          last_name: string | null;
-        })
-      : null;
-  console.log(userData);
+  const table = "profiles";
+  const fields = ["role", "first_name", "last_name"];
+  const userData = await fetchTableData<Profile>({ table, fields });
+
   return (
     <div className="h-screen flex">
       {/* Left */}

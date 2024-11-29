@@ -3,22 +3,13 @@ import Calendar from "@/components/Calendar";
 import Welcome from "@/components/Welcome";
 import Tutors from "@/components/Tutors";
 import Lessons from "@/components/Lessons";
-import pullData from "../../../components/pullData";
+import fetchTableData from "@/services/userApis";
+import { Profile } from "@/types/profile";
 
 const StudentPage = async () => {
-  const rawUserData = await pullData("profiles", ["role", "first_name", "last_name"]);
-  const userData =
-    rawUserData &&
-    typeof rawUserData === "object" &&
-    "role" in rawUserData &&
-    "first_name" in rawUserData &&
-    "last_name" in rawUserData
-      ? (rawUserData as {
-          role: string | null;
-          first_name: string | null;
-          last_name: string | null;
-        })
-      : null;
+  const table = "profiles";
+  const fields = ["first_name"];
+  const userData = await fetchTableData<Profile>({ table, fields });
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
       {/*LEFT*/}
