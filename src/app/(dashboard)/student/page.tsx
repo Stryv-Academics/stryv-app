@@ -4,12 +4,14 @@ import Welcome from "@/components/Welcome";
 import Tutors from "@/components/Tutors";
 import Lessons from "@/components/Lessons";
 import fetchTableData from "@/services/userApis";
+import Chat from "@/components/Chat";
 import { Profile } from "@/types/profile";
 
 const StudentPage = async () => {
   const table = "profiles";
   const fields = ["first_name"];
   const userData = await fetchTableData<Profile>({ table, fields });
+
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
       {/*LEFT*/}
