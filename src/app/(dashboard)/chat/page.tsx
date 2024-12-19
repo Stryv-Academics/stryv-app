@@ -8,7 +8,6 @@ const supabase = createClient(
 );
 
 const ChatPage = async () => {
-  // Fetch messages from Supabase
   const { data, error } = await supabase
     .from("messages")
     .select("*")
@@ -19,9 +18,8 @@ const ChatPage = async () => {
     return <div>Error loading messages</div>;
   }
 
-  // Format messages
   const formattedMessages = data.map((message) => ({
-    User: { name: message.sender_id }, // Adjust based on your schema
+    User: { name: message.sender_id }, //this will eventually be unnecessary if we only have one-to-one chats since we in a certain chat, we know who the person is already
     message: message.content,
   }));
 

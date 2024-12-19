@@ -39,20 +39,19 @@ export default function Chat({ initialMessages }: ChatComponentProps) {
             ]);
         });
 
-        // Cleanup on component unmount
-        /* return () => {
+        // cleanup on component unmount
+        return () => {
             channel.unbind_all();
             channel.unsubscribe();
-        }; */
+        };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
-        const sender_id = "b2630bb4-4f3e-45c6-86c8-c4c24ac38573"; // Replace with dynamic user data if available
+        const sender_id = "b2630bb4-4f3e-45c6-86c8-c4c24ac38573"; // replace with dynamic user data if available
     
         try {
-            // Insert the new message into Supabase
             const { data, error } = await supabase
                 .from("messages")
                 .insert([{ sender_id, content: newMessage }]);
@@ -62,17 +61,15 @@ export default function Chat({ initialMessages }: ChatComponentProps) {
                 return;
             }
     
-            // Log the data being sent to Pusher
             const eventData = {
                 sender_id,
                 content: newMessage,
             };
             console.log("Triggering Pusher event with data:", eventData);
     
-            // Trigger Pusher event directly
             await triggerPusherEvent("stryv-test-development", "new-message", eventData);
     
-            setNewMessage(""); // Clear the input field
+            setNewMessage(""); // clear the input field
         } catch (err) {
             console.error("Unexpected error:", err);
         }
@@ -84,7 +81,7 @@ export default function Chat({ initialMessages }: ChatComponentProps) {
             <div className="flex flex-col gap-4 mb-4">
                 {messages.map((msg, index) => (
                     <div key={index}>
-                        <strong>{msg.User.name || "Anonymous"}:</strong> {msg.message}
+                        <strong>{msg.User.name || "Anonymous"}:</strong> {msg.message} //user.name will have to be pulled from context of the chat opened
                     </div>
                 ))}
             </div>
@@ -94,6 +91,7 @@ export default function Chat({ initialMessages }: ChatComponentProps) {
                 <input
                     type="text"
                     value={newMessage}
+                    //this ensures that when user is typing something, whatever is typed is stored in newMessage, which is then used when the button/form is submitted
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-grow p-2 border rounded"
