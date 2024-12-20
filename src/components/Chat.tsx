@@ -27,6 +27,7 @@ export default function Chat({ initialMessages, user }: ChatProps) {
 
     // Pusher setup for real-time updates
     useEffect(() => {
+        console.time("Pusher execution time");
         const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
             cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
         });
@@ -38,6 +39,7 @@ export default function Chat({ initialMessages, user }: ChatProps) {
                 { User: { name: data.sender_id }, message: data.content },
             ]);
         });
+        console.timeEnd("Pusher execution time");
 
         return () => {
             channel.unbind_all();

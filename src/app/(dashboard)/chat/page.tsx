@@ -22,12 +22,13 @@ const ChatPage = async () => {
     console.error("Error fetching user profile:", profileError.message);
     return <div>Error loading profile</div>;
   }
-
+  console.time("Pulling messages execution time");
   const { data: messages, error: messagesError } = await supabase
     .from("messages")
     .select("*")
     //.eq("sender_id", user.id)
     .order("created_at", { ascending: true });
+  console.timeEnd("Pulling messages execution time");
 
   if (messagesError) {
       console.error("Error fetching messages:", messagesError.message);

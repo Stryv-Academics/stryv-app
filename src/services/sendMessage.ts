@@ -1,5 +1,6 @@
 export const triggerPusherEvent = async (channel: string, event: string, data: any) => {
     try {
+        console.time("Send message execution time");
         const response = await fetch("/api/pusher", {
             method: "POST",
             headers: {
@@ -7,6 +8,7 @@ export const triggerPusherEvent = async (channel: string, event: string, data: a
             },
             body: JSON.stringify({ channel, event, data }),
         });
+        console.timeEnd("Send message execution time");
 
         if (!response.ok) {
             throw new Error(`Failed to trigger Pusher event: ${response.statusText}`);
