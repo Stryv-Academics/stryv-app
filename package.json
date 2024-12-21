@@ -9,14 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.460.0",
-    "next": "^15.0.3",
-    "react": "^18",
+    "next": "^15.1.1",
+    "react": "^18.3.1",
     "react-calendar": "^5.1.0",
-    "react-dom": "^18",
+    "react-dom": "^18.3.1",
     "recharts": "^2.13.3"
   },
   "devDependencies": {
