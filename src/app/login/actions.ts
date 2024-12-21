@@ -8,39 +8,37 @@ import { createClient } from "@/utils/supabase/server";
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
+  // Extract email and password from formData
+  const credentials = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  // Attempt to sign in with email and password
+  const { data: authData, error } = await supabase.auth.signInWithPassword(credentials);
 
   if (error) {
-    redirect("/error");
+    redirect("/error"); // Redirect if there's an authentication error
   }
-
-  revalidatePath("/", "layout");
-  redirect("/student");
+  revalidatePath("/student", "layout"); // Revalidate cache for the layout
+  redirect("/home");
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
+  // Extract email and password from formData
+  const credentials = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const { error } = await supabase.auth.signUp(credentials);
 
   if (error) {
-    redirect("/error");
+    redirect("/error"); // Redirect if there's an error during sign-up
   }
 
   revalidatePath("/student", "layout");
-  redirect("/student");
+  redirect("/home");
 }

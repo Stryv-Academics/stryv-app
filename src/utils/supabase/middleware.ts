@@ -2,64 +2,99 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
           });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
         },
       },
     }
   );
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
+  // check logged in or not
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // no user = go to login
+  if (!user && request.nextUrl.pathname !== "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
+  let role = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    role = profile?.role;
+  }
+
+  //if we aren't trying to logout
+
+  if (!request.nextUrl.pathname.startsWith("/auth")) {
+    // go to home if u have a role and assigntype if not
+    if (request.nextUrl.pathname === "/login" && user) {
+      const url = request.nextUrl.clone();
+      url.pathname = role ? `/${role}` : "/assigntype";
+      return NextResponse.redirect(url);
+    }
+
+    //if ur logged in and u try to go to assigntype, go home
+    if (request.nextUrl.pathname.startsWith("/assigntype") && user) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${role}`;
+      return NextResponse.redirect(url);
+    }
+
+    // literally go to assigntype if u dont have a role
+    if (user && !role && request.nextUrl.pathname !== "/assigntype") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/assigntype";
+      return NextResponse.redirect(url);
+    }
+
+    const originalPath = request.nextUrl.pathname;
+
+    // send people to role-appropriate link
+    if (originalPath.startsWith("/tutor") && role !== "tutor") {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${role}`;
+      return NextResponse.redirect(url);
+    }
+
+    if (originalPath.startsWith("/student") && role !== "student") {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${role}`;
+      return NextResponse.redirect(url);
+    }
+
+    if (originalPath.startsWith("/parent") && role !== "parent") {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${role}`;
+      return NextResponse.redirect(url);
+    }
+
+    // if you are on a link without role then proceed to /role/link without infinite loop
+    if (role && !request.nextUrl.pathname.startsWith(`/${role}`)) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${role}${request.nextUrl.pathname}`;
+      return NextResponse.redirect(url);
+    }
+  }
+
+
 
   return supabaseResponse;
 }

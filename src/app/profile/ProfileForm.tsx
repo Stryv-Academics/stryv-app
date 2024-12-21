@@ -39,8 +39,7 @@ export default function ProfileForm({
       console.error("An error occurred:", error); // Log the error
       // Display a more detailed error message to the user
       alert(
-        `Error updating the data: ${
-          error.message || "An unknown error occurred."
+        `Error updating the data: ${error.message || "An unknown error occurred."
         }`
       );
     } finally {
