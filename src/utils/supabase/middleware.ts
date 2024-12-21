@@ -47,14 +47,14 @@ export async function updateSession(request: NextRequest) {
     // go to home if u have a role and assigntype if not
     if (request.nextUrl.pathname === "/login" && user) {
       const url = request.nextUrl.clone();
-      url.pathname = role ? `/${role}/home` : "/assigntype";
+      url.pathname = role ? `/${role}` : "/assigntype";
       return NextResponse.redirect(url);
     }
 
     //if ur logged in and u try to go to assigntype, go home
     if (request.nextUrl.pathname.startsWith("/assigntype") && user) {
       const url = request.nextUrl.clone();
-      url.pathname = `/${role}/home`;
+      url.pathname = `/${role}`;
       return NextResponse.redirect(url);
     }
 
@@ -70,19 +70,19 @@ export async function updateSession(request: NextRequest) {
     // send people to role-appropriate link
     if (originalPath.startsWith("/tutor") && role !== "tutor") {
       const url = request.nextUrl.clone();
-      url.pathname = `/${role}/home`;
+      url.pathname = `/${role}`;
       return NextResponse.redirect(url);
     }
 
     if (originalPath.startsWith("/student") && role !== "student") {
       const url = request.nextUrl.clone();
-      url.pathname = `/${role}/home`;
+      url.pathname = `/${role}`;
       return NextResponse.redirect(url);
     }
 
     if (originalPath.startsWith("/parent") && role !== "parent") {
       const url = request.nextUrl.clone();
-      url.pathname = `/${role}/home`;
+      url.pathname = `/${role}`;
       return NextResponse.redirect(url);
     }
 
