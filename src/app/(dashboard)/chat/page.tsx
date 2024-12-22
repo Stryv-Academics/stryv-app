@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-//import Chat from "@/components/Chat";
 
 const ChatPage = async () => {
 
@@ -55,23 +54,6 @@ const ChatPage = async () => {
 
     
   }
-  /* console.time("Pulling messages execution time");
-  const { data: messages, error: messagesError } = await supabase
-    .from("messages")
-    .select("*")
-    //.eq("sender_id", user.id)
-    .order("created_at", { ascending: true });
-  console.timeEnd("Pulling messages execution time");
-
-  if (messagesError) {
-      console.error("Error fetching messages:", messagesError.message);
-      return <div>Error loading messages</div>;
-  }
-
-  const formattedMessages = messages.map((message) => ({
-      User: { name: message.sender_id },
-      message: message.content,
-  })); */
 
   return (
     <div>
