@@ -28,7 +28,7 @@ const ChatPage = async () => {
     const firstNames = await Promise.all(
       conversations.map(async (conversation) => {
         const { data, error} = await supabase
-          .from("profiles")
+          .from("accounts")
           .select("first_name")
           .eq("id", conversation.user_id);
         console.log(conversation.user_id);

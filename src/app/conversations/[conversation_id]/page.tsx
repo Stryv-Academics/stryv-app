@@ -1,11 +1,15 @@
-import Messages from "@/components/Messages";
+import { fetchMessagesWithFirstNames } from "@/services/getMessages";
+import Chat from "@/components/Chat";
 
 const ConversationPage = async ({ params }: { params: { conversation_id: string } }) => {
-    const { conversation_id } = await params;
+    const convo = params.conversation_id;
+
+    const messages = await fetchMessagesWithFirstNames(convo);
 
     return (
         <div>
-            <Messages conversation_id={conversation_id} />
+            
+            <Chat initialMessages={messages} conversation_id={ convo } />
         </div>
     );
 };
