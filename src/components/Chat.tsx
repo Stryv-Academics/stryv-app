@@ -123,7 +123,7 @@ interface MessageProp {
 
 interface ChatProps {
     initialMessages: MessageProp[];
-    conversation_id: string;
+    conversation_id: any;
 }
 
 const Chat = ({ initialMessages, conversation_id }: ChatProps) => {

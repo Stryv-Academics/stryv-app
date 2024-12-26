@@ -8,7 +8,7 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const table = "profiles";
+  const table = "accounts";
   const fields = ["role", "first_name", "last_name"];
   const userData = await fetchTableData<Profile>({ table, fields });
 
