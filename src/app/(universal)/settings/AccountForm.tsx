@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { User, Account } from "@/types";
+import { Button } from "@/components/ui/button";
 
 export default function AccountForm({
   user,
@@ -29,22 +31,24 @@ export default function AccountForm({
         updated_at: new Date().toISOString(),
       });
       if (error) {
-        console.error("Error details:", error); // Log the detailed error to the console
-        throw error; // Throw the error for catch block handling
+        console.error("Error details:", error);
+        throw error;
       }
 
       alert("Profile updated!");
     } catch (error) {
-      console.error("An error occurred:", error); // Log the error
+      console.error("An error occurred:", error);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="form-widget">
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">Your Profile</h2>
+    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-900 text-center">
+          Your Profile
+        </h2>
         <div>
           <label
             htmlFor="email"
@@ -106,32 +110,32 @@ export default function AccountForm({
           />
         </div>
 
-        <div>
-          <button
-            className="button primary block w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-            onClick={() => updateProfile()}
-            disabled={loading}
-          >
-            {loading ? "Loading ..." : "Update"}
-          </button>
-        </div>
+        <Button
+          onClick={() => updateProfile()}
+          disabled={loading}
+          className="w-full h-12 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          {loading ? "Loading ..." : "Update"}
+        </Button>
 
-        <div>
+        <div className="mt-6 space-y-4">
           <form action="/auth/logout" method="post">
-            <button
-              className="button block text-gray-500 hover:text-blue-600 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            <Button
               type="submit"
+              variant="outline"
+              className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Logout
-            </button>
+            </Button>
           </form>
           <form action="/student" method="post">
-            <button
-              className="button block text-gray-500 hover:text-blue-600 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            <Button
               type="submit"
+              variant="outline"
+              className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Back to home
-            </button>
+            </Button>
           </form>
         </div>
       </div>

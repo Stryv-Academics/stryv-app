@@ -2,11 +2,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Account } from "@/types";
 import { fetchTableDataSingle } from "@/services/supabase/dataService";
 import { getUserStrict } from "@/app/auth/server/userHandlers";
-import Welcome from "@/components/custom/Welcome";
-import Tutors from "@/components/custom/Tutors";
+import Welcome from "@/components/custom/WelcomeCard";
+import Tutors from "@/components/custom/TutorsCard";
 import CalendarView from "@/components/custom/CalendarCard";
-import Progress from "@/components/custom/Progress";
-import Lessons from "@/components/custom/Lessons";
+import Progress from "@/components/custom/ProgressCard";
+import Lessons from "@/components/custom/LessonsCard";
 
 export default async function StudentPage() {
   // Fetch id of authenticated user

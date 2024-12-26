@@ -56,14 +56,14 @@ const menuSections = [
     items: [
       {
         icon: "/profile.png",
-        label: "Help/FAQ",
-        action: "/help",
+        label: "Support",
+        action: "/support",
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {
         icon: "/phone.png",
         label: "Contact Us",
-        action: "/contact",
+        action: "/contact-us",
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {

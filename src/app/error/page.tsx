@@ -49,7 +49,7 @@ export default function ErrorPage() {
         <p className="mt-8 text-sm text-center text-gray-600">
           Need help? Visit our{" "}
           <a
-            href="/contact"
+            href="/contact-us"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Contact Page

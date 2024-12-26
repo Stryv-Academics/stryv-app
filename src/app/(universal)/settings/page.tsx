@@ -17,5 +17,14 @@ export default async function ProfilePage() {
     userID
   );
 
-  return <AccountForm user={user} userData={userData} />;
+  return (
+    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold text-center text-gray-900 mb-6">
+          Profile Settings
+        </h1>
+        <AccountForm user={user} userData={userData} />
+      </div>
+    </div>
+  );
 }
