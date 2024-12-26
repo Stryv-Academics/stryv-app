@@ -1,17 +1,17 @@
-import AttendanceChart from "@/components/lama/AttendanceChart";
-import Calendar from "@/components/lama/Calendar";
-import CountChart from "@/components/lama/CountChart";
-import Progress from "@/components/lama/Progress";
-import UserCard from "@/components/lama/UserCard";
-import Welcome from "@/components/lama/Welcome";
-import { getUserStrict } from "@/app/auth/server/userHandlers";
-import { fetchTableDataSingle } from "@/services/supabase/dataService";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Account } from "@/types";
+import { fetchTableDataSingle } from "@/services/supabase/dataService";
+import { getUserStrict } from "@/app/auth/server/userHandlers";
+import Welcome from "@/components/custom/Welcome";
+import Tutors from "@/components/custom/Tutors";
+import CalendarView from "@/components/custom/CalendarCard";
+import Progress from "@/components/custom/Progress";
+import Lessons from "@/components/custom/Lessons";
 
 export default async function AdminPage() {
   // Fetch id of authenticated user
   const userID: string = (await getUserStrict()).id;
-  console.log("[Admin Page] User ID:", userID);
+  console.log("[Student Page] User ID:", userID);
 
   // Fetch user data for UI
   const userData = await fetchTableDataSingle<Account>(
@@ -22,36 +22,30 @@ export default async function AdminPage() {
   );
 
   return (
-    <div className="p-4 flex gap-4 flex-col md:flex-row">
-      {/*LEFT*/}
-      <div className="w-full lg:w-1/2 flex flex-col gap-8">
-        {/*USER CARDS*/}
-        <div className="flex gap-4 justify-between flex-wrap flex-col">
-          <Welcome userData={userData} />
-          <div className="flex flex-row">
-            <UserCard type="teacher" />
-            <UserCard type="parent" />
-            <UserCard type="staff" />
-          </div>
-        </div>
-        {/*MIDDLE CHARTS*/}
-        <div className="flex gap-4 flex-col lg:flex-row">
-          {/*COUNT CHART*/}
-          <div className="w-full lg:w-1/3 h-[450px]">
-            <CountChart />
-          </div>
-          {/*ATTENDANCE CHART*/}
-          <div className="w-full lg:w-2/3 h-[450px]">
-            <AttendanceChart />
-          </div>
-        </div>
-        {/*BOTTOM CHARTS*/}
-        <div className=""></div>
+    <div className="flex flex-col lg:flex-row gap-6 p-6">
+      {/* Left Section */}
+      <div className="w-full lg:w-1/2 flex flex-col gap-6">
+        <Welcome userData={userData} />
+
+        <Tabs defaultValue="lessons" className="w-full">
+          <TabsList className="flex justify-between">
+            <TabsTrigger value="lessons">Lessons</TabsTrigger>
+            <TabsTrigger value="tutors">Tutors</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="lessons">
+            <Lessons />
+          </TabsContent>
+          <TabsContent value="tutors">
+            <Tutors />
+          </TabsContent>
+        </Tabs>
       </div>
-      {/*RIGHT*/}
+
+      {/* Right Section */}
       <div className="w-full lg:w-1/2 flex flex-col gap-6">
         <Progress />
-        <Calendar />
+        <CalendarView />
       </div>
     </div>
   );

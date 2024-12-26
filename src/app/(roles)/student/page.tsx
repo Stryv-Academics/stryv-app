@@ -1,11 +1,12 @@
-import Progress from "@/components/lama/Progress";
-import Calendar from "@/components/lama/Calendar";
-import Welcome from "@/components/lama/Welcome";
-import Tutors from "@/components/lama/Tutors";
-import Lessons from "@/components/lama/Lessons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Account } from "@/types";
 import { fetchTableDataSingle } from "@/services/supabase/dataService";
 import { getUserStrict } from "@/app/auth/server/userHandlers";
-import { Account } from "@/types";
+import Welcome from "@/components/custom/Welcome";
+import Tutors from "@/components/custom/Tutors";
+import CalendarView from "@/components/custom/CalendarCard";
+import Progress from "@/components/custom/Progress";
+import Lessons from "@/components/custom/Lessons";
 
 export default async function StudentPage() {
   // Fetch id of authenticated user
@@ -21,20 +22,30 @@ export default async function StudentPage() {
   );
 
   return (
-    <div className="p-4 flex gap-4 flex-col md:flex-row">
-      {/*LEFT*/}
-      <div className="w-full lg:w-1/2 flex flex-col gap-8">
-        {/*USER CARDS*/}
-        <div className="flex gap-4 justify-between flex-wrap flex-col">
-          <Welcome userData={userData} />
-          <Lessons />
-          <Tutors />
-        </div>
+    <div className="flex flex-col lg:flex-row gap-6 p-6">
+      {/* Left Section */}
+      <div className="w-full lg:w-1/2 flex flex-col gap-6">
+        <Welcome userData={userData} />
+
+        <Tabs defaultValue="lessons" className="w-full">
+          <TabsList className="flex justify-between">
+            <TabsTrigger value="lessons">Lessons</TabsTrigger>
+            <TabsTrigger value="tutors">Tutors</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="lessons">
+            <Lessons />
+          </TabsContent>
+          <TabsContent value="tutors">
+            <Tutors />
+          </TabsContent>
+        </Tabs>
       </div>
-      {/*RIGHT*/}
+
+      {/* Right Section */}
       <div className="w-full lg:w-1/2 flex flex-col gap-6">
         <Progress />
-        <Calendar />
+        <CalendarView />
       </div>
     </div>
   );
