@@ -59,7 +59,7 @@ export const signInWithMagicLink = validatedAction(
     const { email, next } = data;
 
     // Build redirect URL dynamically with 'next' query parameter
-    const redirectTo = `${config.domainName}/api/auth/callback${
+    const redirectTo = `${config.domainName}/auth/server/callback${
       next ? `?next=${encodeURIComponent(next)}` : ""
     }`;
     console.log(`[signInWithMagicLink] Intended redirect URL: ${redirectTo}`);
@@ -88,7 +88,7 @@ export const signInWithGoogle = async (next: string | null) => {
   const supabase = await createClient();
 
   try {
-    const redirectTo = `${config.domainName}/api/auth/callback${
+    const redirectTo = `${config.domainName}/auth/server/callback${
       next ? `?next=${encodeURIComponent(next)}` : ""
     }`;
     console.log(`[signInWithGoogle] Intended redirect URL: ${redirectTo}`);

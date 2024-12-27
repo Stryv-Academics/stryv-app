@@ -62,10 +62,7 @@ export async function updateSession(request: NextRequest) {
   // of sync and terminate the user's session prematurely!
 
   // Allow all /auth path requests immediately
-  if (
-    request.nextUrl.pathname.startsWith("/auth") ||
-    request.nextUrl.pathname.startsWith("/api/auth")
-  ) {
+  if (request.nextUrl.pathname.startsWith("/auth")) {
     console.log(
       `[updateSession] Returning /auth path request immediately: ${request.nextUrl.pathname}`
     );
