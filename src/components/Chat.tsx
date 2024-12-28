@@ -1,111 +1,7 @@
-/* "use client";
-
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { triggerPusherEvent } from "@/services/sendMessage";
-import Pusher from "pusher-js";
-
-const supabase = createClient();
-
-interface User {
-    id: string;
-}
-
-interface ChatProps {
-    initialMessages: {
-        User: {
-            name: string | null;
-        };
-        message: string;
-    }[];
-    user: User;
-}
-
-export default function Chat({ initialMessages, user }: ChatProps) {
-    const [messages, setMessages] = useState(initialMessages);
-    const [newMessage, setNewMessage] = useState("");
-
-    // Pusher setup for real-time updates
-    useEffect(() => {
-        console.time("Pusher execution time");
-        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
-            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
-        });
-
-        const channel = pusher.subscribe("stryv-test-development");
-        channel.bind("new-message", (data: any) => {
-            setMessages((prevMessages) => [
-                ...(prevMessages || []),
-                { User: { name: data.sender_id }, message: data.content },
-            ]);
-        });
-        console.timeEnd("Pusher execution time");
-
-        return () => {
-            channel.unbind_all();
-            channel.unsubscribe();
-        };
-    }, []);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setNewMessage(""); // clear the input field
-
-        const sender_id = user.id;
-
-        try {
-            const { data, error } = await supabase
-                .from("messages")
-                .insert([{ content: newMessage }]);
-
-            if (error) {
-                console.error("Error sending message:", error.message);
-                return;
-            }
-
-            const eventData = {
-                sender_id,
-                content: newMessage,
-            };
-
-            await triggerPusherEvent("stryv-test-development", "new-message", eventData);
-
-        } catch (err) {
-            console.error("Unexpected error:", err);
-        }
-    };
-
-    return (
-        <div>
-            <div className="flex flex-col gap-4 mb-4">
-                {messages.map((msg, index) => (
-                    <div key={index}>
-                        <strong>{msg?.User?.name || "Anonymous"}:</strong> {msg?.message || ""}
-                    </div>
-                ))}
-            </div>
-            <form onSubmit={handleSubmit} className="flex gap-2">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-grow p-2 border rounded"
-                />
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                    Send
-                </button>
-            </form>
-        </div>
-    );
-}
- */
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { triggerPusherEvent } from "@/services/sendMessage";
 import Pusher from "pusher-js";
 
 const supabase = createClient();
@@ -153,50 +49,54 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         };
     }, []);
 
+    const formatDateTime = (isoString: string | null) => {
+        if (!isoString) return "";
+        const date = new Date(isoString);
+        return date.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setNewMessage(""); // clear the input field
-
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-            console.error("Error fetching user:", userError?.message || "No user found");
-            return;
-        }
-
-        const { data: profile, error } = await supabase
-                .from("accounts")
-                .select("first_name")
-                .eq("id", user.id);
-
+        setNewMessage(""); // Clear the input field
+    
         try {
-            const { data, error } = await supabase
-                .from("messages")
-                .insert([{ content: newMessage, conversation_id: conversation_id }]);
-
-            if (error) {
-                console.error("Error sending message:", error.message);
+            const response = await fetch("/api/sendMsg", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    content: newMessage,
+                    conversation_id,
+                }),
+            });
+    
+            if (!response.ok) {
+                console.error("Error sending message:", await response.text());
                 return;
             }
-
-            const eventData = {
-                sender_id: user.id,
-                content: newMessage,
-                first_name: profile?.[0]?.first_name,
-            };
-
-            await triggerPusherEvent("stryv-test-development", "new-message", eventData);
-
+    
+            console.log("Message sent successfully");
         } catch (err) {
             console.error("Unexpected error:", err);
         }
     };
-
+    
+    console.log(messages);
     return (
         <div>
             <div className="flex flex-col gap-4 mb-4">
                 {messages.map((msg, index) => (
                     <div key={index}>
-                        <strong>{msg?.first_name || "Anonymous"}:</strong> {msg?.content || ""}
+                        <strong>{msg?.first_name || "Anonymous"}:</strong>
+                        {msg?.content || ""}
+                        <i className="block text-sm text-gray-500">{msg?.created_at ? formatDateTime(msg.created_at) : ""}</i>
                     </div>
                 ))}
             </div>
