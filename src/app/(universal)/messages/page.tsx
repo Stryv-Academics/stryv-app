@@ -1,4 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 const ChatPage = async () => {
 
@@ -49,23 +51,19 @@ const ChatPage = async () => {
   const allFirstNames = await fetchNamesForConversations();
   console.log(allFirstNames);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault;
-
-    
-  }
-
   return (
     <div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
               {allFirstNames.map((firstName, index) => (
-                <div key={index}>
-                  {firstName}
-                </div>
+                <Link href={`/conversations/${conversations[index].conversation_id}`}>
+                  <div key={index}>
+                        {firstName}
+                  </div>
+                </Link>
               ))}
+            </button>
           </div>
-        </button>
     </div>
   );
 };
