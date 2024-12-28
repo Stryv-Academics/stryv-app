@@ -1,52 +1,52 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getUserRole } from "@/app/auth/server/roleHandlers";
 
 export async function updateSession(request: NextRequest) {
+  console.log("[updateSession] Incoming request:", {
+    url: request.url,
+    method: request.method,
+    cookies: request.cookies.getAll(),
+  });
+
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  let supabase;
+  try {
+    // Initialize Supabase client
+    supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            supabaseResponse = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+      }
+    );
+    console.log("[updateSession] Supabase client initialized successfully.");
+  } catch (error) {
+    console.error("[updateSession] Error initializing Supabase client:", error);
+    return NextResponse.error(); // Return error response if Supabase fails to initialize
+  }
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:
@@ -61,5 +61,102 @@ export async function updateSession(request: NextRequest) {
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
 
+  // Allow all /auth path requests immediately
+  if (request.nextUrl.pathname.startsWith("/auth")) {
+    console.log(
+      `[updateSession] Returning /auth path request immediately: ${request.nextUrl.pathname}`
+    );
+    return supabaseResponse;
+  }
+
+  // Check whether user is authenticated
+  console.log("[updateSession] Fetching user...");
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error("[updateSession] Error fetching user data:", error);
+  }
+
+  console.log("[updateSession] User data retrieved:", user);
+
+  // If user is NOT authenticated, allow immediate access OR redirect to /sign-in page
+  const loginRoutes = ["/sign-in", "/sign-up"];
+  if (!user) {
+    if (!loginRoutes.includes(request.nextUrl.pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/sign-in";
+      if (request.nextUrl.pathname !== "/") {
+        console.log(
+          `[updateSession] Attaching next path parameter to response url: ${request.nextUrl.pathname}`
+        );
+        url.searchParams.set("next", request.nextUrl.pathname);
+      }
+      console.log(
+        `[updateSession] Redirecting unauthenticated user from ${request.nextUrl.pathname} to ${url.pathname}.`
+      );
+      return NextResponse.redirect(url);
+    } else {
+      console.log(
+        `[updateSession] Returning login path request immediately: ${request.nextUrl.pathname}`
+      );
+      return supabaseResponse;
+    }
+  }
+
+  // Get the user's role using the custom getUserRole function
+  console.log("[updateSession] Fetching user's role...");
+  const role = await getUserRole();
+
+  // If user is authenticated but doesn't have a valid role, redirect them to /assign-role
+  if (user && !role && request.nextUrl.pathname !== "/assign-role") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/assign-role";
+    if (request.nextUrl.pathname !== "/") {
+      console.log(
+        `[updateSession] Attaching next path parameter to response url: ${request.nextUrl.pathname}`
+      );
+      url.searchParams.set("next", request.nextUrl.pathname);
+    }
+    console.log(
+      `[updateSession] Redirecting user with invalid role from ${request.nextUrl.pathname} to ${url.pathname}.`
+    );
+    return NextResponse.redirect(url);
+  }
+
+  // If user is authenticated and requests a login route, redirect them to their homepage: /${role}
+  if (
+    user &&
+    (loginRoutes.includes(request.nextUrl.pathname) ||
+      request.nextUrl.pathname === "/")
+  ) {
+    console.log(
+      `[updateSession] Redirecting authenticated user from ${request.nextUrl.pathname} to /${role}.`
+    );
+    const url = request.nextUrl.clone();
+    url.pathname = `/${role}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect non-admin users trying to access admin pages to home page
+  if (
+    user &&
+    role !== "admin" &&
+    request.nextUrl.pathname.startsWith("/admin")
+  ) {
+    console.log(
+      `[updateSession] Redirecting non-admin user from ${request.nextUrl.pathname} to /${role}.`
+    );
+    const url = request.nextUrl.clone();
+    url.pathname = `/${role}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Return the original supabase response
+  console.log(
+    `[updateSession] Returning original Supabase response: ${request.nextUrl.pathname}`
+  );
   return supabaseResponse;
 }

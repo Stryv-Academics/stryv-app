@@ -33,3 +33,4 @@ const StudentPage = async () => {
 };
 
 export default StudentPage;
+
