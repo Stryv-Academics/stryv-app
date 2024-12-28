@@ -79,9 +79,8 @@ const menuSections = [
 
 export default function Menu({ userData }: { userData: Account }) {
   const role = (userData.role as Role) ?? Roles.STUDENT;
-  const fullName = `${userData.first_name ?? "Guest"} ${
-    userData.last_name ?? ""
-  }`.trim();
+  const fullName = `${userData.first_name ?? "Guest"} ${userData.last_name ?? ""
+    }`.trim();
   const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
 
   return (
