@@ -145,7 +145,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect roled users trying to access pages that are not their roles to home page
 
-  const roleRoutes = ['profile', 'calendar', 'messages', 'progress'] as const;
+  const roleRoutes = ['profile', 'calendar', 'progress'] as const;
 
   if (
     user &&
@@ -173,7 +173,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const universalPaths = ['settings', 'support'] as const;
+  const universalPaths = ['messages', 'settings', 'support'] as const;
 
   if (
     user &&
