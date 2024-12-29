@@ -126,7 +126,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If user is authenticated and requests a login route, redirect them to their homepage: /${role}
+  // If user is authenticated and requests a login or root route, redirect them to their homepage: /${role}
   if (
     user &&
     (loginRoutes.includes(request.nextUrl.pathname) ||
@@ -147,7 +147,7 @@ export async function updateSession(request: NextRequest) {
   if (
     user &&
     role && // Ensure role exists
-    roleRoutes.some(path => request.nextUrl.pathname.startsWith("/" + path)) // Check if pathname starts with any roleRoutes
+    roleRoutes.some(path => request.nextUrl.pathname.startsWith(`/${path}`)) // Check if pathname starts with any roleRoutes
   ) {
     console.log(
       `[updateSession] Redirecting user from ${request.nextUrl.pathname} to /${role}/${request.nextUrl.pathname}`
