@@ -38,6 +38,7 @@ const formatDateTime = (isoString: string | null) => {
 const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const [messages, setMessages] = useState(initialMessages);
     const [newMessage, setNewMessage] = useState("");
+    const [file, setFile] = useState<File | null>(null);
 
     // Pusher setup for real-time updates
     useEffect(() => {
@@ -62,6 +63,36 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         };
     }, []);
 
+    const uploadFile = async (file: File) => {
+        const file_path = `${Date.now()}-${file.name}`;
+
+        const { data, error } = await supabase.storage
+            .from("attachments")
+            .upload(file_path, file);
+
+        if (error) {
+            console.error('Error uploading file:', error.message);
+            console.error('Detailed error:', error);
+            return "";
+        }
+
+        const { data: publicUrl } = supabase.storage.from("attachments").getPublicUrl(file_path);
+        console.log(publicUrl.publicUrl);
+        return publicUrl.publicUrl || "";
+    }
+
+    /* const saveAttachmentMessage = async (message: string, attachment_url: string, conversation_id: string, user_id: string) => {
+        const { data, error } = await supabase
+            .from("messages")
+            .insert([{ content: message, attachment_url: attachment_url, conversation_id: conversation_id, sender_id: user_id }]);
+        if (error) {
+            console.error('Error saving message:', error.message);
+            return null;
+        }
+    
+        return data;
+    } */
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setNewMessage(""); // clear the input field
@@ -77,10 +108,24 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 .select("first_name")
                 .eq("id", user.id);
 
+        /* const fileInput = document.getElementById("file") as HTMLInputElement;
+        const file = fileInput?.files ? fileInput.files[0] : null; */
+        let attachment_url: any = "";
+    
+        if (file) {
+            console.log("File selected:", file.name);
+            attachment_url = await uploadFile(file);
+            //await saveAttachmentMessage(newMessage, attachment_url, conversation_id, user.id)
+            if (!attachment_url) {
+                console.log("File upload failed");
+                return;
+            }
+        }
+
         try {
             const { data, error } = await supabase
                 .from("messages")
-                .insert([{ content: newMessage, conversation_id: conversation_id }]);
+                .insert([{ content: newMessage, conversation_id: conversation_id, sender_id: user.id, attachment_url: attachment_url }]);
 
             if (error) {
                 console.error("Error sending message:", error.message);
@@ -92,6 +137,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 content: newMessage,
                 first_name: profile?.[0]?.first_name,
                 created_at: formatDateTime(new Date().toISOString()),
+                attachment_url: attachment_url,
             };
 
             await triggerPusherEvent("stryv-test-development", "new-message", eventData);
@@ -107,6 +153,15 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 {messages.map((msg, index) => (
                     <div key={index}>
                         <strong>{msg?.first_name || "Anonymous"}:</strong> {msg?.content || ""}
+                        {msg.attachment_url && (
+                            <div className="mt-2">
+                                <img
+                                    src={msg.attachment_url}
+                                    alt="Attachment"
+                                    className="max-w-full h-auto border rounded"
+                                />
+                            </div>
+                        )}
                         <i className="block text-sm text-gray-500">{msg?.created_at ? formatDateTime(msg.created_at) : ""}</i>
                     </div>
                 ))}
@@ -119,7 +174,16 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     placeholder="Type your message..."
                     className="flex-grow p-2 border rounded"
                 />
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                <input
+                    type="file"
+                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                    className="border p-2 rounded"
+                />
+                <button type="submit" className={`px-4 py-2 rounded transition-all duration-200 ${
+                        newMessage.trim() === ""
+                            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                    }`} disabled={newMessage.trim() === ""}>
                     Send
                 </button>
             </form>
