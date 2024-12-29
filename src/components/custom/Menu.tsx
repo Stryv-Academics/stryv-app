@@ -32,6 +32,12 @@ const menuSections = [
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {
+        icon: "/assignment.png",
+        label: "Progress",
+        action: "/progress",
+        visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
+      },
+      {
         icon: "/profile.png",
         label: "Profile",
         action: "/profile",
