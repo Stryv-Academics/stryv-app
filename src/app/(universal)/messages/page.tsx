@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { useRouter } from "next/router";
 import Link from "next/link";
 
 const ChatPage = async () => {
@@ -56,7 +55,7 @@ const ChatPage = async () => {
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
               {allFirstNames.map((firstName, index) => (
-                <Link href={`/conversations/${conversations[index].conversation_id}`}>
+                <Link href={`/messages/${conversations[index].conversation_id}`}>
                   <div key={index}>
                         {firstName}
                   </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { triggerPusherEvent } from "@/services/triggerPusherEvent";
 import Pusher from "pusher-js";
 
 const supabase = createClient();
@@ -22,6 +23,18 @@ interface ChatProps {
     conversation_id: any;
 }
 
+const formatDateTime = (isoString: string | null) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
+
 const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const [messages, setMessages] = useState(initialMessages);
     const [newMessage, setNewMessage] = useState("");
@@ -38,7 +51,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             setMessages((prevMessages) => [
                 ...(prevMessages || []),
                 { id: null, conversation_id: conversation_id, content: data.content, message_type: null,
-                    attachment_url: null, created_at: null, sender_id: data.sender_id, first_name: data.first_name },
+                    attachment_url: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name },
             ]);
         });
         console.timeEnd("Pusher execution time");
@@ -49,53 +62,51 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         };
     }, []);
 
-    const formatDateTime = (isoString: string | null) => {
-        if (!isoString) return "";
-        const date = new Date(isoString);
-        return date.toLocaleString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setNewMessage(""); // Clear the input field
-    
+        setNewMessage(""); // clear the input field
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+            console.error("Error fetching user:", userError?.message || "No user found");
+            return;
+        }
+
+        const { data: profile, error } = await supabase
+                .from("accounts")
+                .select("first_name")
+                .eq("id", user.id);
+
         try {
-            const response = await fetch("/api/sendMsg", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    content: newMessage,
-                    conversation_id,
-                }),
-            });
-    
-            if (!response.ok) {
-                console.error("Error sending message:", await response.text());
+            const { data, error } = await supabase
+                .from("messages")
+                .insert([{ content: newMessage, conversation_id: conversation_id }]);
+
+            if (error) {
+                console.error("Error sending message:", error.message);
                 return;
             }
-    
-            console.log("Message sent successfully");
+
+            const eventData = {
+                sender_id: user.id,
+                content: newMessage,
+                first_name: profile?.[0]?.first_name,
+                created_at: formatDateTime(new Date().toISOString()),
+            };
+
+            await triggerPusherEvent("stryv-test-development", "new-message", eventData);
+
         } catch (err) {
             console.error("Unexpected error:", err);
         }
     };
-    
-    console.log(messages);
+
     return (
         <div>
             <div className="flex flex-col gap-4 mb-4">
                 {messages.map((msg, index) => (
                     <div key={index}>
-                        <strong>{msg?.first_name || "Anonymous"}:</strong>
-                        {msg?.content || ""}
+                        <strong>{msg?.first_name || "Anonymous"}:</strong> {msg?.content || ""}
                         <i className="block text-sm text-gray-500">{msg?.created_at ? formatDateTime(msg.created_at) : ""}</i>
                     </div>
                 ))}
