@@ -18,6 +18,7 @@ const ChatPage = async () => {
     .select("*")
     //.eq("user_id", user.id) //this line is not necessary if supabase RLS policy is used
   console.log(conversations);
+
   if (conversationsError) {
     console.error("Error fetching conversation history:", conversationsError.message);
     return <div>Error loading conversations</div>;
@@ -25,9 +26,38 @@ const ChatPage = async () => {
     return <div>No conversation history.</div>
   }
 
-  const fetchNamesForConversations = async () => {
-    const firstNames = await Promise.all(
-      conversations.map(async (conversation) => {
+  const uniqueConversations = Array.from(
+    new Map(conversations.map((conv) => [conv.conversation_id, conv])).values()
+  );
+
+  const fetchConversationNames = async () => {
+    const names = await Promise.all(
+      uniqueConversations.map(async (conversation) => {
+        const { data, error } = await supabase
+          .from("conversations")
+          .select("title")
+          .eq("id", conversation.conversation_id);
+
+        if (!data || data.length === 0 || data[0].title === null) {
+          console.warn(`No title found for ${conversation.conversation_id}`);
+          const { data: accountData, error: accountError} = await supabase
+            .from("accounts")
+            .select("first_name")
+            .eq("id", conversation.user_id);
+          
+          if (accountError) {
+            console.error(`Error fetching name for user_id ${conversation.user_id}`);
+            return null;
+          }
+          if (!accountData || accountData.length === 0) {
+            console.warn(`No name found for user_id ${conversation.user_id}`);
+            return null;
+          }
+          return accountData[0].first_name; //there is only one element in the array for each conversation
+        }
+        return data[0].title;
+      })
+      /* conversations.map(async (conversation) => {
         const { data, error} = await supabase
           .from("accounts")
           .select("first_name")
@@ -42,26 +72,26 @@ const ChatPage = async () => {
           return null;
         }
         return data[0].first_name; //there is only one element in the array for each conversation
-      })
+      }) */
     );
-    return firstNames;
+    return names;
   }
   
-  const allFirstNames = await fetchNamesForConversations();
-  console.log(allFirstNames);
+  const allConversationNames = await fetchConversationNames();
+  console.log(allConversationNames);
 
   return (
     <div>
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-              {allFirstNames.map((firstName, index) => (
-                <Link href={`/messages/${conversations[index].conversation_id}`}>
-                  <div key={index}>
-                        {firstName}
-                  </div>
-                </Link>
+              {allConversationNames.map((name, index) => (
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                  <Link href={`/messages/${uniqueConversations[index].conversation_id}`}>
+                    <div key={index}>
+                          {name}
+                    </div>
+                  </Link>
+                </button>
               ))}
-            </button>
           </div>
     </div>
   );
