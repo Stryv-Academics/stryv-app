@@ -13,6 +13,7 @@ interface MessageProp {
     content: string | null;
     message_type: string | null;
     attachment_url: string | null;
+    attachment_name: string | null;
     created_at: string | null;
     sender_id: string | null;
     first_name: string | null;
@@ -72,8 +73,8 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 }
                 return [
                 ...(prevMessages || []),
-                { id: null, conversation_id: conversation_id, content: data.content, message_type: null,
-                    attachment_url: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name },
+                { id: null, conversation_id: conversation_id, content: data.content, message_type: null, attachment_url: null, 
+                    attachment_name: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name },
             ]});
         });
         console.timeEnd("Pusher execution time");
@@ -94,12 +95,15 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         if (error) {
             console.error('Error uploading file:', error.message);
             console.error('Detailed error:', error);
-            return "";
+            return { url: "", type: "" };
         }
 
         const { data: publicUrl } = supabase.storage.from("attachments").getPublicUrl(file_path);
         console.log(publicUrl.publicUrl);
-        return publicUrl.publicUrl || "";
+        return {
+            url: publicUrl.publicUrl || "",
+            type: file.type,
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -121,36 +125,54 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             return;
         }
 
-        const tempId = Date.now().toString(); // Temporary ID for optimistic update
+        let attachment_url: any = "";
+        let message_type = "text";
+        let attachment_name: any = "";
+    
+        if (file) {
+            console.log("File selected:", file.name);
+            const { url, type } = await uploadFile(file);
+
+            if (type.startsWith("image/")) {
+                message_type = "image";
+            } else if (type.startsWith("video/")) {
+                message_type = "video";
+            } else if (type === "application/pdf") {
+                message_type = "pdf";
+            } else if (type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                message_type = "docx";
+            }
+
+            if (!url) {
+                console.log("File upload failed");
+                return;
+            }            
+            attachment_url = url;
+            attachment_name = file.name;
+        }
+
+        console.log(attachment_name);
+
         const tempMessage: MessageProp = {
-            id: tempId,
+            id: null,
             conversation_id: conversation_id,
             content: newMessage,
-            message_type: null,
+            message_type: message_type,
             attachment_url: file ? URL.createObjectURL(file) : null, // Show local preview for file
+            attachment_name: attachment_name,
             created_at: new Date().toISOString(),
-            sender_id: user.id, // Replace with actual user ID if available
-            first_name: profile[0].first_name, // Replace with actual user name if available
+            sender_id: user.id,
+            first_name: profile[0].first_name,
         };
 
         setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
         setNewMessage(""); // clear input field
-
-        let attachment_url: any = "";
-    
-        if (file) {
-            console.log("File selected:", file.name);
-            attachment_url = await uploadFile(file);
-            if (!attachment_url) {
-                console.log("File upload failed");
-                return;
-            }
-        }
+        setFile(null);
 
         try {
             const { data, error } = await supabase
                 .from("messages")
-                .insert([{ content: newMessage, conversation_id: conversation_id, sender_id: user.id, attachment_url: attachment_url }]);
+                .insert([{ content: newMessage, conversation_id: conversation_id, sender_id: user.id, attachment_url: attachment_url, message_type: message_type, }]);
 
             if (error) {
                 console.error("Error sending message:", error.message);
@@ -163,6 +185,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 first_name: profile[0].first_name,
                 created_at: formatDateTime(new Date().toISOString()),
                 attachment_url: attachment_url,
+                message_type: message_type,
             };
 
             await triggerPusherEvent("stryv-test-development", "new-message", eventData);
@@ -172,19 +195,35 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         }
     };
 
+    console.log(messages);
+
     return (
         <div>
             <div className="flex flex-col gap-4 mb-4">
                 {messages.map((msg, index) => (
                     <div key={index}>
                         <strong>{msg?.first_name || "Anonymous"}:</strong> {msg?.content || ""}
-                        {msg.attachment_url && (
+                        {msg.message_type === "image" && msg.attachment_url && (
                             <div className="mt-2">
                                 <img
                                     src={msg.attachment_url}
-                                    alt="Attachment"
+                                    alt={msg.attachment_url.split("-").pop()}
                                     className="max-w-full h-auto border rounded"
                                 />
+                            </div>
+                        )}
+                        {msg.message_type === "pdf" && msg.attachment_url && (
+                            <div>
+                                <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                                    {msg.attachment_name} {msg.attachment_url.split("-").pop()}
+                                </a>
+                            </div>
+                        )}
+                        {msg.message_type === "docx" && msg.attachment_url && (
+                            <div>
+                                <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                                    {msg.attachment_name} {msg.attachment_url.split("-").pop()}
+                                </a>
                             </div>
                         )}
                         <i className="block text-sm text-gray-500">{msg?.created_at ? formatDateTime(msg.created_at) : ""}</i>
@@ -201,7 +240,12 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 />
                 <input
                     type="file"
-                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                    onChange={(e) => {
+                        const selectedFile = e.target.files ? e.target.files[0] : null;
+                        setFile(selectedFile);
+                        if (selectedFile) {
+                            console.log(selectedFile.name);
+                        }}}
                     className="border p-2 rounded"
                 />
                 <button type="submit" className={`px-4 py-2 rounded transition-all duration-200 ${
