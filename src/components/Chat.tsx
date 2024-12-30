@@ -39,9 +39,25 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const [messages, setMessages] = useState(initialMessages);
     const [newMessage, setNewMessage] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                console.error("Error fetching user:", error?.message || "No user found");
+                return;
+            }
+            console.log("gotten userId");
+            setUserId(user.id); // Set user ID to state
+        };
+        fetchUser();
+    }, []);
 
     // Pusher setup for real-time updates
     useEffect(() => {
+        if (!userId) return;
+
         console.time("Pusher execution time");
         const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
             cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
@@ -49,11 +65,16 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
 
         const channel = pusher.subscribe("stryv-test-development");
         channel.bind("new-message", (data: any) => {
-            setMessages((prevMessages) => [
+            setMessages((prevMessages) => {
+                if (data.sender_id === userId) {
+                    console.log("meow");
+                    return prevMessages;
+                }
+                return [
                 ...(prevMessages || []),
                 { id: null, conversation_id: conversation_id, content: data.content, message_type: null,
                     attachment_url: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name },
-            ]);
+            ]});
         });
         console.timeEnd("Pusher execution time");
 
@@ -61,7 +82,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             channel.unbind_all();
             channel.unsubscribe();
         };
-    }, []);
+    }, [userId]);
 
     const uploadFile = async (file: File) => {
         const file_path = `${Date.now()}-${file.name}`;
@@ -81,21 +102,9 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         return publicUrl.publicUrl || "";
     }
 
-    /* const saveAttachmentMessage = async (message: string, attachment_url: string, conversation_id: string, user_id: string) => {
-        const { data, error } = await supabase
-            .from("messages")
-            .insert([{ content: message, attachment_url: attachment_url, conversation_id: conversation_id, sender_id: user_id }]);
-        if (error) {
-            console.error('Error saving message:', error.message);
-            return null;
-        }
-    
-        return data;
-    } */
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setNewMessage(""); // clear the input field
+        if (!newMessage.trim()) return;
 
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) {
@@ -103,19 +112,35 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             return;
         }
 
-        const { data: profile, error } = await supabase
+        const { data: profile, error: profileError } = await supabase
                 .from("accounts")
                 .select("first_name")
                 .eq("id", user.id);
+        if (profileError || !profile) {
+            console.error("Error fetching profile:", profileError || "No profile found");
+            return;
+        }
 
-        /* const fileInput = document.getElementById("file") as HTMLInputElement;
-        const file = fileInput?.files ? fileInput.files[0] : null; */
+        const tempId = Date.now().toString(); // Temporary ID for optimistic update
+        const tempMessage: MessageProp = {
+            id: tempId,
+            conversation_id: conversation_id,
+            content: newMessage,
+            message_type: null,
+            attachment_url: file ? URL.createObjectURL(file) : null, // Show local preview for file
+            created_at: new Date().toISOString(),
+            sender_id: user.id, // Replace with actual user ID if available
+            first_name: profile[0].first_name, // Replace with actual user name if available
+        };
+
+        setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
+        setNewMessage(""); // clear input field
+
         let attachment_url: any = "";
     
         if (file) {
             console.log("File selected:", file.name);
             attachment_url = await uploadFile(file);
-            //await saveAttachmentMessage(newMessage, attachment_url, conversation_id, user.id)
             if (!attachment_url) {
                 console.log("File upload failed");
                 return;
@@ -135,7 +160,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             const eventData = {
                 sender_id: user.id,
                 content: newMessage,
-                first_name: profile?.[0]?.first_name,
+                first_name: profile[0].first_name,
                 created_at: formatDateTime(new Date().toISOString()),
                 attachment_url: attachment_url,
             };
