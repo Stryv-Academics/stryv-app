@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { triggerPusherEvent } from "@/services/triggerPusherEvent";
 import Pusher from "pusher-js";
 
+const MAX_FILE_SIZE = 1 * 1024 * 1024;
 const supabase = createClient();
 
 interface MessageProp {
@@ -68,7 +69,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         channel.bind("new-message", (data: any) => {
             setMessages((prevMessages) => {
                 if (data.sender_id === userId) {
-                    console.log("meow");
                     return prevMessages;
                 }
                 return [
@@ -86,6 +86,9 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     }, [userId]);
 
     const uploadFile = async (file: File) => {
+        if (file.size > MAX_FILE_SIZE) {
+            return { url: "", type: "" };
+        }
         const file_path = `${Date.now()}-${file.name}`;
 
         const { data, error } = await supabase.storage
@@ -135,9 +138,9 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
 
             if (type.startsWith("image/")) {
                 message_type = "image";
-            } else if (type.startsWith("video/")) {
+            } /* else if (type.startsWith("video/")) {
                 message_type = "video";
-            } else if (type === "application/pdf") {
+            } */ else if (type === "application/pdf") {
                 message_type = "pdf";
             } else if (type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
                 message_type = "docx";
@@ -150,8 +153,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             attachment_url = url;
             attachment_name = file.name;
         }
-
-        console.log(attachment_name);
 
         const tempMessage: MessageProp = {
             id: null,
@@ -212,6 +213,18 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                                 />
                             </div>
                         )}
+                        {/* {msg.message_type === "video" && msg.attachment_url && (
+                            <div className="mt-2">
+                                <video
+                                    controls
+                                    className="max-w-full h-auto border rounded"
+                                >
+                                    <source src={msg.attachment_url} type="video/mp4" />
+                                    <source src={msg.attachment_url} type="video/quicktime" />
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        )} */}
                         {msg.message_type === "pdf" && msg.attachment_url && (
                             <div>
                                 <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
@@ -240,11 +253,16 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 />
                 <input
                     type="file"
+                    accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
                     onChange={(e) => {
                         const selectedFile = e.target.files ? e.target.files[0] : null;
-                        setFile(selectedFile);
                         if (selectedFile) {
-                            console.log(selectedFile.name);
+                            if (selectedFile.size > MAX_FILE_SIZE) {
+                                alert(`File size exceeds the limit of 1MB. Please select a smaller file.`);
+                                e.target.value = "";
+                                return;
+                            }
+                            setFile(selectedFile);
                         }}}
                     className="border p-2 rounded"
                 />
