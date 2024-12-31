@@ -32,6 +32,12 @@ const menuSections = [
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {
+        icon: "/assignment.png",
+        label: "Progress",
+        action: "/progress",
+        visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
+      },
+      {
         icon: "/profile.png",
         label: "Profile",
         action: "/profile",
@@ -79,9 +85,8 @@ const menuSections = [
 
 export default function Menu({ userData }: { userData: Account }) {
   const role = (userData.role as Role) ?? Roles.STUDENT;
-  const fullName = `${userData.first_name ?? "Guest"} ${
-    userData.last_name ?? ""
-  }`.trim();
+  const fullName = `${userData.first_name ?? "Guest"} ${userData.last_name ?? ""
+    }`.trim();
   const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
 
   return (
