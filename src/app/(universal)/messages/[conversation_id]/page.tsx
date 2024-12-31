@@ -1,5 +1,5 @@
 import { fetchMessages } from "@/services/getMessages";
-import Chat from "@/components/Chat";
+import Chat from "@/components/custom/Chat";
 import { redirect } from "next/navigation";
 
 const ConversationPage = async ({ params }: { params: { conversation_id: string } }) => {
