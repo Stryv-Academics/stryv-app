@@ -140,52 +140,6 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect roled users trying to access pages that are not their roles to home page
-
-  const roleRoutes = ['profile', 'calendar', 'progress'] as const;
-
-  if (
-    user &&
-    role && // Ensure role exists
-    roleRoutes.some(path => request.nextUrl.pathname.startsWith(`/${path}`)) // Check if pathname starts with any roleRoutes
-  ) {
-    console.log(
-      `[updateSession] Redirecting user from ${request.nextUrl.pathname} to /${role}/${request.nextUrl.pathname}`
-    );
-    const url = request.nextUrl.clone();
-    url.pathname = `/${role}/${request.nextUrl.pathname}`;
-    return NextResponse.redirect(url);
-  }
-
-  //
-
-  if (user && role && roleRoutes.some(path => request.nextUrl.pathname.includes(path))) {
-    const urlParts = request.nextUrl.pathname.split('/');
-    const currentRole = urlParts[1];
-
-    if (currentRole !== role && (currentRole == 'tutor' || currentRole == 'admin' || currentRole == 'student' || currentRole == 'parent')) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${role}${request.nextUrl.pathname.substring(currentRole.length + 1)}`;
-      return NextResponse.redirect(url);
-    }
-  }
-
-  const universalPaths = ['messages', 'settings', 'support'] as const;
-
-  if (
-    user &&
-    role && // Ensure role exists
-    universalPaths.some(path => request.nextUrl.pathname.includes("/" + path)) // Check if pathname contains a universal path
-  ) {
-    const urlParts = request.nextUrl.pathname.split('/');
-    const currentRole = urlParts[1];
-    if (currentRole == 'tutor' || currentRole == 'admin' || currentRole == 'student' || currentRole == 'parent') {
-      const url = request.nextUrl.clone();
-      url.pathname = request.nextUrl.pathname.substring(currentRole.length + 1);
-      return NextResponse.redirect(url);
-    }
-  }
-
   // Return the original supabase response
   console.log(
     `[updateSession] Returning original Supabase response: ${request.nextUrl.pathname}`
