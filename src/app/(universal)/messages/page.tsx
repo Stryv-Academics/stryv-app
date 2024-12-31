@@ -1,6 +1,17 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
+import {
+  MessageSquare,
+  Search,
+  Clock,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
 const ChatPage = async () => {
 
   const supabase = await createClient();
@@ -57,22 +68,6 @@ const ChatPage = async () => {
         }
         return data[0].title;
       })
-      /* conversations.map(async (conversation) => {
-        const { data, error} = await supabase
-          .from("accounts")
-          .select("first_name")
-          .eq("id", conversation.user_id);
-        console.log(conversation.user_id);
-        if (error) {
-          console.error(`Error fetching name for user_id ${conversation.user_id}`);
-          return null;
-        }
-        if (!data || data.length === 0) {
-          console.warn(`No name found for user_id ${conversation.user_id}`);
-          return null;
-        }
-        return data[0].first_name; //there is only one element in the array for each conversation
-      }) */
     );
     return names;
   }
@@ -81,18 +76,56 @@ const ChatPage = async () => {
   console.log(allConversationNames);
 
   return (
-    <div>
-          <div className="w-full lg:w-1/2 flex flex-col gap-6">
+    <div className="max-w-full h-screen mx-auto p-6 bg-white flex flex-col">
+      <Card className="shadow-sm rounded-lg flex-1 overflow-hidden">
+        <div className="h-full flex flex-col">
+          <div className="p-6 flex-shrink-0">
+              <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center justify-start gap-2">
+                      <Link href={`/`}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="hover:bg-gray-100"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
+                      </Link>
+                      <MessageSquare className="w-10 h-10 text-blue-600 mt-1" />
+                      <h1 className="text-3xl font-semibold text-gray-900">
+                          Messages
+                      </h1>
+                  </div>
+              </div>
+          </div>
+          <div className="w-full lg:w-1/0 flex flex-col gap-6 px-14">
               {allConversationNames.map((name, index) => (
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                  <Link href={`/messages/${uniqueConversations[index].conversation_id}`}>
-                    <div key={index}>
-                          {name}
+                <div key={index} className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                    <img
+                      src={uniqueConversations[index].profilePicture || '/default-profile.png'}
+                      alt={`${name}'s profile`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                <Link href={`/messages/${uniqueConversations[index].conversation_id}`} className="flex-1">
+                <div
+                key={index}
+                className="p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">
+                              {name}
+                          </span>
+                      </div>
                     </div>
+                  </div>
                   </Link>
-                </button>
+                </div>
               ))}
           </div>
+          </div>
+      </Card>
     </div>
   );
 };
