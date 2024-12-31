@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { triggerPusherEvent } from "@/services/triggerPusherEvent";
+import Link from "next/link";
 import Pusher from "pusher-js";
+import {
+    MessageSquare,
+    Search,
+    Clock,
+    Send,
+    ArrowLeft,
+    File
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024;
 const supabase = createClient();
@@ -42,6 +54,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const [newMessage, setNewMessage] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -74,7 +87,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 return [
                 ...(prevMessages || []),
                 { id: null, conversation_id: conversation_id, content: data.content, message_type: null, attachment_url: null, 
-                    attachment_name: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name },
+                    attachment_name: null, created_at: data.created_at, sender_id: data.sender_id, first_name: data.first_name || null },
             ]});
         });
         console.timeEnd("Pusher execution time");
@@ -163,7 +176,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             attachment_name: attachment_name,
             created_at: new Date().toISOString(),
             sender_id: user.id,
-            first_name: profile[0].first_name,
+            first_name: profile[0].first_name || null,
         };
 
         setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
@@ -183,7 +196,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             const eventData = {
                 sender_id: user.id,
                 content: newMessage,
-                first_name: profile[0].first_name,
+                first_name: profile[0].first_name || null,
                 created_at: formatDateTime(new Date().toISOString()),
                 attachment_url: attachment_url,
                 message_type: message_type,
@@ -197,6 +210,91 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     };
 
     console.log(messages);
+    if (!messages[0].first_name) {
+        console.log("No first name lah");
+    }
+    
+    return (
+        <div className="h-full flex flex-col">
+            <div className="flex items-center gap-4 p-6">
+                <Link href={`/messages`}>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-gray-100"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                </Link>
+                {/* <h2 className="text-xl font-semibold text-gray-900">
+                    {selectedMessage.sender}
+                </h2> */}
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                {messages.map((msg) => (
+                    <div
+                        key={msg.id}
+                        className={`flex ${msg.sender_id === userId ? "justify-end" : "justify-start"}`}
+                    >
+                        <div
+                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_id === userId
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100 text-gray-900"
+                                }`}
+                        >
+                            <p className="text-sm">{msg.content}</p>
+                            <span className="text-xs mt-1 block opacity-70">
+                                <i className="block text-sm">{msg?.created_at ? formatDateTime(msg.created_at) : ""}</i>
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="flex gap-2 p-6 bg-white items-center">
+                <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
+                    <Input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        className="flex-grow p-2 border rounded"
+                    />
+                    <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
+                        onChange={(e) => {
+                            const selectedFile = e.target.files ? e.target.files[0] : null;
+                            if (selectedFile) {
+                                if (selectedFile.size > MAX_FILE_SIZE) {
+                                    alert(`File size exceeds the limit of 1MB. Please select a smaller file.`);
+                                    e.target.value = "";
+                                    return;
+                                }
+                                setFile(selectedFile);
+                            }}}
+                        ref={fileInputRef}
+                        className="hidden"
+                    />
+                    <Button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`px-4 py-2 rounded ${
+                            "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
+                    >
+                        <File className="w-4 h-4" />
+                    </Button>
+                    <Button type="submit" className={`px-4 py-2 rounded transition-all duration-200 ${
+                            newMessage.trim() === ""
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`} disabled={newMessage.trim() === ""}>
+                        <Send className="w-4 h-4" />
+                    </Button>
+                </form>
+            </div>
+        </div>
+    )
 
     return (
         <div>
