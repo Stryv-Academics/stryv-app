@@ -246,7 +246,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col">
-        <div className="flex items-center gap-4 p-6">
+        <div className="sticky top-0 z-10 bg-white p-6 shadow">
           <Link href={`/messages`}>
             <Button variant="ghost" size="sm" className="hover:bg-gray-100">
               <ArrowLeft className="w-5 h-5" />
@@ -271,7 +271,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     : "bg-gray-100 text-gray-900"
                 }`}
               >
-                <p className="text-sm">{msg.content}</p>
+                <p className="text-m">{msg.content}</p>
                 {msg.message_type === "image" && msg.attachment_url && (
                   <div className="mt-2">
                     <img
@@ -299,7 +299,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       href={msg.attachment_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline"
+                      className="text-gray-900 underline"
                     >
                       {msg.attachment_name}{" "}
                       {msg.attachment_url.split("-").pop()}
@@ -312,7 +312,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       href={msg.attachment_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline"
+                      className="text-gray-900 underline"
                     >
                       {msg.attachment_name}{" "}
                       {msg.attachment_url.split("-").pop()}
@@ -328,7 +328,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 p-6 bg-white items-center">
+        <div className="sticky bottom-0 z-10 bg-white p-6 shadow">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
@@ -384,7 +384,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   } else {
     return (
       <div className="h-full flex flex-col">
-        <div className="flex items-center gap-4 p-6">
+        <div className="sticky top-0 z-10 bg-white p-6 shadow">
           <Link href={`/messages`}>
             <Button variant="ghost" size="sm" className="hover:bg-gray-100">
               <ArrowLeft className="w-5 h-5" />
@@ -410,7 +410,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 }`}
               >
                 <strong>{msg?.first_name || "Anonymous"}</strong>
-                <p className="text-sm">{msg.content}</p>
+                <p className="text-m">{msg.content}</p>
                 {msg.message_type === "image" && msg.attachment_url && (
                   <div className="mt-2">
                     <img
@@ -438,7 +438,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       href={msg.attachment_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline"
+                      className="text-gray-900 underline"
                     >
                       {msg.attachment_name}{" "}
                       {msg.attachment_url.split("-").pop()}
@@ -451,7 +451,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       href={msg.attachment_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline"
+                      className="text-gray-900 underline"
                     >
                       {msg.attachment_name}{" "}
                       {msg.attachment_url.split("-").pop()}
@@ -467,7 +467,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 p-6 bg-white items-center">
+        <div className="sticky bottom-0 z-10 bg-white p-6 shadow">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
@@ -522,104 +522,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     );
   }
 
-  return (
-    <div>
-      <div className="flex flex-col gap-4 mb-4">
-        {messages.map((msg, index) => (
-          <div key={index}>
-            <strong>{msg?.first_name || "Anonymous"}:</strong>{" "}
-            {msg?.content || ""}
-            {msg.message_type === "image" && msg.attachment_url && (
-              <div className="mt-2">
-                <img
-                  src={msg.attachment_url}
-                  alt={msg.attachment_url.split("-").pop()}
-                  className="max-w-full h-auto border rounded"
-                />
-              </div>
-            )}
-            {/* {msg.message_type === "video" && msg.attachment_url && (
-                            <div className="mt-2">
-                                <video
-                                    controls
-                                    className="max-w-full h-auto border rounded"
-                                >
-                                    <source src={msg.attachment_url} type="video/mp4" />
-                                    <source src={msg.attachment_url} type="video/quicktime" />
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                        )} */}
-            {msg.message_type === "pdf" && msg.attachment_url && (
-              <div>
-                <a
-                  href={msg.attachment_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {msg.attachment_name} {msg.attachment_url.split("-").pop()}
-                </a>
-              </div>
-            )}
-            {msg.message_type === "docx" && msg.attachment_url && (
-              <div>
-                <a
-                  href={msg.attachment_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {msg.attachment_name} {msg.attachment_url.split("-").pop()}
-                </a>
-              </div>
-            )}
-            <i className="block text-sm text-gray-500">
-              {msg?.created_at ? formatDateTime(msg.created_at) : ""}
-            </i>
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-grow p-2 border rounded"
-        />
-        <input
-          type="file"
-          accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
-          onChange={(e) => {
-            const selectedFile = e.target.files ? e.target.files[0] : null;
-            if (selectedFile) {
-              if (selectedFile.size > MAX_FILE_SIZE) {
-                alert(
-                  `File size exceeds the limit of 1MB. Please select a smaller file.`
-                );
-                e.target.value = "";
-                return;
-              }
-              setFile(selectedFile);
-            }
-          }}
-          className="border p-2 rounded"
-        />
-        <button
-          type="submit"
-          className={`px-4 py-2 rounded transition-all duration-200 ${
-            newMessage.trim() === ""
-              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-          }`}
-          disabled={newMessage.trim() === ""}
-        >
-          Send
-        </button>
-      </form>
-    </div>
-  );
+
 };
 
 export default Chat;
