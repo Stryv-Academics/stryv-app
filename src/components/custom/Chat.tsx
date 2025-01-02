@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { triggerPusherEvent } from "@/services/triggerPusherEvent";
 import Link from "next/link";
 import Pusher from "pusher-js";
-import { Send, ArrowLeft, File } from "lucide-react";
+import { Send, ArrowLeft, File, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -46,7 +46,10 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const closeModal = () => setSelectedImage(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -271,14 +274,15 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     : "bg-gray-100 text-gray-900"
                 }`}
               >
-                <p className="text-m">{msg.content}</p>
                 {msg.message_type === "image" && msg.attachment_url && (
-                  <div className="mt-2">
+                  <div className="mt-2 relative group cursor-pointer">
                     <img
                       src={msg.attachment_url}
                       alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-full h-auto border rounded"
+                      className="max-w-[30vw] max-h-[30vh] p--3 object-cover border rounded cursor-pointed"
+                      onClick={() => setSelectedImage(msg.attachment_url)}
                     />
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
                   </div>
                 )}
                 {/* {msg.message_type === "video" && msg.attachment_url && (
@@ -319,6 +323,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     </a>
                   </div>
                 )}
+                <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
                 <span className="text-xs mt-1 block opacity-70">
                   <i className="block text-sm">
                     {msg?.created_at ? formatDateTime(msg.created_at) : ""}
@@ -379,6 +384,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </Button>
           </form>
         </div>
+        {selectedImage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+          onClick={closeModal}>
+            <img src={selectedImage} alt="Expanded image" className="max-w-[80vw] max-h-[80vh] object-contain rounded" />
+            <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7" onClick={closeModal} />
+          </div>
+        )}
       </div>
     );
   } else {
@@ -410,14 +422,15 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 }`}
               >
                 <strong>{msg?.first_name || "Anonymous"}</strong>
-                <p className="text-m">{msg.content}</p>
                 {msg.message_type === "image" && msg.attachment_url && (
-                  <div className="mt-2">
+                  <div className="mt-2 relative group cursor-pointer">
                     <img
                       src={msg.attachment_url}
                       alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-full h-auto border rounded"
+                      className="max-w-[500px] max-h-[500px] object-cover border rounded cursor-pointed"
+                      onClick={() => setSelectedImage(msg.attachment_url)}
                     />
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
                   </div>
                 )}
                 {/* {msg.message_type === "video" && msg.attachment_url && (
@@ -458,6 +471,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     </a>
                   </div>
                 )}
+                <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
                 <span className="text-xs mt-1 block opacity-70 text-right">
                   <i className="block text-sm">
                     {msg?.created_at ? formatDateTime(msg.created_at) : ""}
@@ -518,11 +532,16 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </Button>
           </form>
         </div>
+        {selectedImage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+          onClick={closeModal}>
+            <img src={selectedImage} alt="Expanded image" className="max-w-[80vw] max-h-[80vh] object-contain rounded" />
+            <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7" onClick={closeModal} />
+          </div>
+        )}
       </div>
     );
   }
-
-
 };
 
 export default Chat;
