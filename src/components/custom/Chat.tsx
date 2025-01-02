@@ -47,6 +47,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [conversationName, setConversationName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const closeModal = () => setSelectedImage(null);
@@ -64,7 +65,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         );
         return;
       }
-      console.log("gotten userId");
       setUserId(user.id); // Set user ID to state
     };
     fetchUser();
@@ -128,7 +128,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const { data: publicUrl } = supabase.storage
       .from("attachments")
       .getPublicUrl(file_path);
-    console.log(publicUrl.publicUrl);
     return {
       url: publicUrl.publicUrl || "",
       type: file.type,
@@ -245,19 +244,48 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     }
   };
 
+  const getConversationName = async () => {
+    if (messages.length > 0) {
+      const { data, error } = await supabase
+      .from("conversations")
+      .select("title")
+      .eq("id", messages[0].conversation_id);
+      if (error) {
+        console.error("Error fetching conversation name:", error);
+      } else if (!data || data?.[0]?.title === null) {
+        const { data: conversationData, error: conversationError } = await supabase
+            .from("conversation_participants")
+            .select("user_id")
+            .eq("conversation_id", messages[0].conversation_id);
+        const { data: accountData, error: accountError } = await supabase
+            .from("accounts")
+            .select("first_name")
+            .eq("id", conversationData?.[0]?.user_id);
+        setConversationName(accountData?.[0]?.first_name);
+      } else {
+        setConversationName(data?.[0]?.title || "Untitled Conversation");
+      }
+    }
+  }
+  useEffect(() => {
+    getConversationName();
+  }, []);
+
   console.log(messages);
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col">
-        <div className="sticky top-0 z-10 bg-white p-6 shadow">
-          <Link href={`/messages`}>
-            <Button variant="ghost" size="sm" className="hover:bg-gray-100">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          {/* <h2 className="text-xl font-semibold text-gray-900">
-                        {selectedMessage.sender}
-                    </h2> */}
+        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow">
+          <div className="flex items-center gap-4">
+            <Link href={`/messages`}>
+              <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {conversationName}
+            </h2>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
           {messages.map((msg) => (
@@ -271,7 +299,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 className={`max-w-[70%] rounded-lg p-3 ${
                   msg.sender_id === userId
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-900"
+                    : "bg-gray-200 text-gray-900"
                 }`}
               >
                 {msg.message_type === "image" && msg.attachment_url && (
@@ -279,7 +307,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                     <img
                       src={msg.attachment_url}
                       alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-[30vw] max-h-[30vh] p--3 object-cover border rounded cursor-pointed"
+                      className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
                       onClick={() => setSelectedImage(msg.attachment_url)}
                     />
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
@@ -333,18 +361,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </div>
           ))}
         </div>
-        <div className="sticky bottom-0 z-10 bg-white p-6 shadow">
+        <div className="flex-none sticky bottom-0 z-10 bg-white p-6 shadow">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
           >
-            <Input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-grow p-2 border rounded"
-            />
             <Input
               type="file"
               accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
@@ -371,6 +392,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
+            <Input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-grow p-2 border rounded"
+            />
             <Button
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
@@ -395,16 +423,18 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     );
   } else {
     return (
-      <div className="h-full flex flex-col">
-        <div className="sticky top-0 z-10 bg-white p-6 shadow">
-          <Link href={`/messages`}>
-            <Button variant="ghost" size="sm" className="hover:bg-gray-100">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          {/* <h2 className="text-xl font-semibold text-gray-900">
-                        {selectedMessage.sender}
-                    </h2> */}
+      <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
+        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow">
+          <div className="flex items-center gap-4">
+            <Link href={`/messages`}>
+              <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {conversationName}
+            </h2>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
           {messages.map((msg) => (
@@ -418,16 +448,18 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 className={`max-w-[70%] rounded-lg p-3 ${
                   msg.sender_id === userId
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-900"
+                    : "bg-gray-200 text-gray-900"
                 }`}
               >
-                <strong>{msg?.first_name || "Anonymous"}</strong>
+                {msg.sender_id !== userId && (
+                  <strong>{msg?.first_name || "Anonymous"}</strong>
+                )}
                 {msg.message_type === "image" && msg.attachment_url && (
                   <div className="mt-2 relative group cursor-pointer">
                     <img
                       src={msg.attachment_url}
                       alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-[500px] max-h-[500px] object-cover border rounded cursor-pointed"
+                      className="max-w-full max-h-[30vh] object-contain border rounded cursor-pointed"
                       onClick={() => setSelectedImage(msg.attachment_url)}
                     />
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
@@ -481,18 +513,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </div>
           ))}
         </div>
-        <div className="sticky bottom-0 z-10 bg-white p-6 shadow">
+        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
           >
-            <Input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-grow p-2 border rounded"
-            />
             <Input
               type="file"
               accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
@@ -519,6 +544,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
+            <Input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-grow p-2 border rounded"
+            />
             <Button
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
