@@ -478,30 +478,30 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                                     </div>
                                 )} */}
                 {msg.message_type === "pdf" && msg.attachment_url && (
-                  <div>
-                    <a
-                      href={msg.attachment_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-900 underline"
-                    >
-                      {msg.attachment_name}{" "}
-                      {msg.attachment_url.split("-").pop()}
-                    </a>
-                  </div>
+                  <a
+                    href={msg.attachment_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
+                  >
+                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
+                      <File className="w-4 h-4" />
+                    </div>
+                    <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
+                  </a>
                 )}
                 {msg.message_type === "docx" && msg.attachment_url && (
-                  <div>
-                    <a
-                      href={msg.attachment_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-900 underline"
-                    >
-                      {msg.attachment_name}{" "}
-                      {msg.attachment_url.split("-").pop()}
-                    </a>
-                  </div>
+                  <a
+                    href={msg.attachment_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
+                  >
+                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
+                      <File className="w-4 h-4" />
+                    </div>
+                    <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
+                  </a>
                 )}
                 <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
                 <span className="text-xs mt-1 block opacity-70 text-right">
