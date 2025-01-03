@@ -74,11 +74,9 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     fetchUser();
   }, []);
 
-  // Pusher setup for real-time updates
   useEffect(() => {
     if (!userId) return;
 
-    console.time("Pusher execution time");
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
     });
@@ -105,7 +103,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         ];
       });
     });
-    console.timeEnd("Pusher execution time");
 
     return () => {
       channel.unbind_all();
@@ -122,10 +119,8 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     const { data, error } = await supabase.storage
       .from("attachments")
       .upload(file_path, file);
-
     if (error) {
       console.error("Error uploading file:", error.message);
-      console.error("Detailed error:", error);
       return { url: "", type: "" };
     }
 
@@ -159,10 +154,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       .select("first_name")
       .eq("id", user.id);
     if (profileError || !profile) {
-      console.error(
-        "Error fetching profile:",
-        profileError || "No profile found"
-      );
+      console.error("Error fetching profile:", profileError || "No profile found");
       return;
     }
 
@@ -180,10 +172,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 message_type = "video";
             } */ else if (type === "application/pdf") {
         message_type = "pdf";
-      } else if (
-        type ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
+      } else if (type ==="application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         message_type = "docx";
       }
 
@@ -212,7 +201,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     setFile(null);
 
     try {
-      const { data, error } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from("messages")
         .insert([
           {
@@ -223,10 +212,17 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             message_type: message_type,
           },
         ]);
-
-      if (error) {
-        console.error("Error sending message:", error.message);
+      if (insertError) {
+        console.error("Error sending message:", insertError.message);
         return;
+      }
+
+      const { data: updateData, error: updateError } = await supabase
+          .from("conversations")
+          .update({"updated_at": new Date().toISOString()})
+          .eq("id", conversation_id);
+      if (updateError) {
+        console.error("Error in updating time new message is sent:", updateError.message);
       }
 
       const eventData = {
