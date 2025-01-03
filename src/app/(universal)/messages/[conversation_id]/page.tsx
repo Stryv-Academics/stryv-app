@@ -6,7 +6,7 @@ const ConversationPage = async ({ params }: { params: { conversation_id: string 
     const { conversation_id } = await params;
     
     // Fetch messages
-    const messages = await fetchMessages(conversation_id);
+    const messages = await fetchMessages(conversation_id, 0, 25);
     if (messages.length === 0) {
         redirect("/error");
         //row level security in supabase already prevents access of messages, but this prevents accessing an empty page

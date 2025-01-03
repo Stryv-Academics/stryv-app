@@ -53,6 +53,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [conversationName, setConversationName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const closeModal = () => setSelectedImage(null);
 
@@ -312,6 +313,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     return `${hours}:${minutes}`;
   }
 
+  useEffect(() => {
+    if (messagesEndRef) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    }
+  }, [groupedMessages]);
+
+
   console.log(messages);
   if (!messages[0].first_name) {
     return (
@@ -409,6 +417,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 ))}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
           <form
@@ -569,6 +578,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
               ))}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
           <form

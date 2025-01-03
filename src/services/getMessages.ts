@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 
-export const fetchMessages = async (conversation_id: string) => {
+export const fetchMessages = async (conversation_id: string, offset: number, limit: number) => {
     const supabase = await createClient();
 
     const { data: conversation, error: conversationError } = await supabase
@@ -17,7 +17,8 @@ export const fetchMessages = async (conversation_id: string) => {
         .from("messages")
         .select("*")
         .eq("conversation_id", conversation_id)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .range(offset, offset + limit - 1);
 
     if (error) {
         console.error("Error fetching messages:", error.message);
