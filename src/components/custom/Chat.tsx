@@ -19,7 +19,7 @@ interface MessageProp {
   message_type: string | null;
   attachment_url: string | null;
   attachment_name: string | null;
-  created_at: string | null;
+  created_at: string;
   sender_id: string | null;
   first_name: string | null;
 }
@@ -28,6 +28,10 @@ interface ChatProps {
   initialMessages: MessageProp[];
   conversation_id: any;
 }
+
+interface GroupedMessages {
+  [date: string]: MessageProp[];
+};
 
 const formatDateTime = (isoString: string | null) => {
   if (!isoString) return "";
@@ -271,10 +275,51 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     getConversationName();
   }, []);
 
+  const groupMessagesByDate = (msgs: MessageProp[]): GroupedMessages => {
+    return msgs.reduce((acc: GroupedMessages, msg: MessageProp) => {
+      const currentYear = new Date().getFullYear();
+      const date = new Date(msg.created_at);
+      const today = new Date();
+      date.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      let dateFormatted;
+
+      if (date.getTime() === today.getTime()) {
+        dateFormatted = "Today";
+      } else if (date.getFullYear() === currentYear) {
+        dateFormatted = date.toLocaleDateString(undefined, {
+          month: "long",
+          day: "numeric"
+        });
+      } else {
+        dateFormatted = date.toLocaleDateString(undefined, {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        });
+      }
+      if (!acc[dateFormatted]) {
+        acc[dateFormatted] = [];
+      }
+      acc[dateFormatted].push(msg);
+      return acc;
+    }, {});
+  };
+
+  const groupedMessages = groupMessagesByDate(messages);
+
+  function formatTime(dateString: any) {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  }
+
   console.log(messages);
   if (!messages[0].first_name) {
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
         <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow">
           <div className="flex items-center gap-4">
             <Link href={`/messages`}>
@@ -288,80 +333,88 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender_id === userId ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  msg.sender_id === userId
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-900"
-                }`}
-              >
-                {msg.message_type === "image" && msg.attachment_url && (
-                  <div className="mt-2 relative group cursor-pointer">
-                    <img
-                      src={msg.attachment_url}
-                      alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
-                      onClick={() => setSelectedImage(msg.attachment_url)}
-                    />
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
+          {Object.entries(groupedMessages).map(([date, msgs]) => (
+            <div key={date}>
+              <div className="text-center text-gray-500 text-sm font-medium mb-4">{date}</div>
+              {msgs.map((msg, index) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    msg.sender_id === userId ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[70%] rounded-lg p-3 ${
+                      msg.sender_id === userId
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-900"
+                    }`}
+                    style={{
+                      marginTop: index > 0 && msgs[index - 1].sender_id === msg.sender_id ? '0.15rem' : '0.5rem',
+                    }}
+                  >
+                    {msg.message_type === "image" && msg.attachment_url && (
+                      <div className="mt-2 relative group cursor-pointer">
+                        <img
+                          src={msg.attachment_url}
+                          alt={msg.attachment_url.split("-").pop()}
+                          className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
+                          onClick={() => setSelectedImage(msg.attachment_url)}
+                        />
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
+                      </div>
+                    )}
+                    {/* {msg.message_type === "video" && msg.attachment_url && (
+                                        <div className="mt-2">
+                                            <video
+                                                controls
+                                                className="max-w-full h-auto border rounded"
+                                            >
+                                                <source src={msg.attachment_url} type="video/mp4" />
+                                                <source src={msg.attachment_url} type="video/quicktime" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+                                    )} */}
+                    {msg.message_type === "pdf" && msg.attachment_url && (
+                      <div>
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-900 underline"
+                        >
+                          {msg.attachment_name}{" "}
+                          {msg.attachment_url.split("-").pop()}
+                        </a>
+                      </div>
+                    )}
+                    {msg.message_type === "docx" && msg.attachment_url && (
+                      <div>
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-900 underline"
+                        >
+                          {msg.attachment_name}{" "}
+                          {msg.attachment_url.split("-").pop()}
+                        </a>
+                      </div>
+                    )}
+                    <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
+                    <span className="text-xs block opacity-70 text-right">
+                      <i className="block text-sm select-none">
+                        {msg?.created_at ? formatTime(msg.created_at) : ""}
+                      </i>
+                    </span>
                   </div>
-                )}
-                {/* {msg.message_type === "video" && msg.attachment_url && (
-                                    <div className="mt-2">
-                                        <video
-                                            controls
-                                            className="max-w-full h-auto border rounded"
-                                        >
-                                            <source src={msg.attachment_url} type="video/mp4" />
-                                            <source src={msg.attachment_url} type="video/quicktime" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
-                                )} */}
-                {msg.message_type === "pdf" && msg.attachment_url && (
-                  <div>
-                    <a
-                      href={msg.attachment_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-900 underline"
-                    >
-                      {msg.attachment_name}{" "}
-                      {msg.attachment_url.split("-").pop()}
-                    </a>
-                  </div>
-                )}
-                {msg.message_type === "docx" && msg.attachment_url && (
-                  <div>
-                    <a
-                      href={msg.attachment_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-900 underline"
-                    >
-                      {msg.attachment_name}{" "}
-                      {msg.attachment_url.split("-").pop()}
-                    </a>
-                  </div>
-                )}
-                <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
-                <span className="text-xs mt-1 block opacity-70">
-                  <i className="block text-sm">
-                    {msg?.created_at ? formatDateTime(msg.created_at) : ""}
-                  </i>
-                </span>
-              </div>
+                </div>
+                ))}
             </div>
           ))}
         </div>
-        <div className="flex-none sticky bottom-0 z-10 bg-white p-6 shadow">
+        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
@@ -437,79 +490,87 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender_id === userId ? "justify-end" : "justify-start"
-              }`}
-            >
+          {Object.entries(groupedMessages).map(([date, msgs]) => (
+            <div key={date}>
+              <div className="text-center text-gray-500 text-sm font-medium mb-4">{date}</div>
+            {msgs.map((msg, index) => (
               <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  msg.sender_id === userId
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-900"
+                key={msg.id}
+                className={`flex ${
+                  msg.sender_id === userId ? "justify-end" : "justify-start"
                 }`}
               >
-                {msg.sender_id !== userId && (
-                  <strong>{msg?.first_name || "Anonymous"}</strong>
-                )}
-                {msg.message_type === "image" && msg.attachment_url && (
-                  <div className="mt-2 relative group cursor-pointer">
-                    <img
-                      src={msg.attachment_url}
-                      alt={msg.attachment_url.split("-").pop()}
-                      className="max-w-full max-h-[30vh] object-contain border rounded cursor-pointed"
-                      onClick={() => setSelectedImage(msg.attachment_url)}
-                    />
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
-                  </div>
-                )}
-                {/* {msg.message_type === "video" && msg.attachment_url && (
-                                    <div className="mt-2">
-                                        <video
-                                            controls
-                                            className="max-w-full h-auto border rounded"
-                                        >
-                                            <source src={msg.attachment_url} type="video/mp4" />
-                                            <source src={msg.attachment_url} type="video/quicktime" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
-                                )} */}
-                {msg.message_type === "pdf" && msg.attachment_url && (
-                  <a
-                    href={msg.attachment_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
-                  >
-                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                      <File className="w-4 h-4" />
+                <div
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    msg.sender_id === userId
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-900"
+                  }`}
+                  style={{
+                    marginTop: index > 0 && msgs[index - 1].sender_id === msg.sender_id ? '0.15rem' : '0.5rem',
+                  }}
+                >
+                  {msg.sender_id !== userId && (
+                    <strong>{msg?.first_name || "Anonymous"}</strong>
+                  )}
+                  {msg.message_type === "image" && msg.attachment_url && (
+                    <div className="mt-2 relative group cursor-pointer">
+                      <img
+                        src={msg.attachment_url}
+                        alt={msg.attachment_url.split("-").pop()}
+                        className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
+                        onClick={() => setSelectedImage(msg.attachment_url)}
+                      />
+                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
                     </div>
-                    <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
-                  </a>
-                )}
-                {msg.message_type === "docx" && msg.attachment_url && (
-                  <a
-                    href={msg.attachment_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
-                  >
-                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                      <File className="w-4 h-4" />
+                  )}
+                  {/* {msg.message_type === "video" && msg.attachment_url && (
+                                      <div className="mt-2">
+                                          <video
+                                              controls
+                                              className="max-w-full h-auto border rounded"
+                                          >
+                                              <source src={msg.attachment_url} type="video/mp4" />
+                                              <source src={msg.attachment_url} type="video/quicktime" />
+                                              Your browser does not support the video tag.
+                                          </video>
+                                      </div>
+                                  )} */}
+                  {msg.message_type === "pdf" && msg.attachment_url && (
+                    <div>
+                      <a
+                        href={msg.attachment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-900 underline"
+                      >
+                        {msg.attachment_name}{" "}
+                        {msg.attachment_url.split("-").pop()}
+                      </a>
                     </div>
-                    <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
-                  </a>
-                )}
-                <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
-                <span className="text-xs mt-1 block opacity-70 text-right">
-                  <i className="block text-sm">
-                    {msg?.created_at ? formatDateTime(msg.created_at) : ""}
-                  </i>
-                </span>
+                  )}
+                  {msg.message_type === "docx" && msg.attachment_url && (
+                    <div>
+                      <a
+                        href={msg.attachment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-900 underline"
+                      >
+                        {msg.attachment_name}{" "}
+                        {msg.attachment_url.split("-").pop()}
+                      </a>
+                    </div>
+                  )}
+                  <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
+                  <span className="text-xs block opacity-70 text-right">
+                    <i className="block text-sm select-none">
+                      {msg?.created_at ? formatTime(msg.created_at) : ""}
+                    </i>
+                  </span>
+                </div>
               </div>
+              ))}
             </div>
           ))}
         </div>
