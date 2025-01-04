@@ -109,11 +109,7 @@ const MessagesPage = async () => {
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center justify-start gap-2">
                 <Link href={`/`}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-gray-100"
-                  >
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100">
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
                 </Link>
@@ -126,36 +122,31 @@ const MessagesPage = async () => {
           </div>
           <div className="w-full lg:w-1/0 flex flex-col gap-4 px-14">
             {conversations.map((conversation: any) => (
-              <div key={conversation.conversation_id} className="flex items-center gap-4 relative w-full">
+              <div key={conversation.conversation_id} className="flex items-center gap-4 w-full">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                  <img
-                    src={
-                      conversation.profilePicture ||
-                      "/default-profile.png"
-                    }
+                  <img src={conversation.profilePicture || "/default-profile.png"}
                     alt={`${conversation.conversation_title}'s profile`}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <Link
-                  href={`/messages/${conversation.conversation_id}`}
-                  className="flex-1"
-                >
+                <Link href={`/messages/${conversation.conversation_id}`} className="flex-1 min-w-0 max-w-full">
                   <div
                     className="p-2 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-sm border border-gray-200"
                   >
-                    <div className="flex justify-start items-start mb-2 w-full relative">
-                      <div className="flex flex-col gap-1 min-w-0 flex-grow">
+                    <div className="flex my-1 w-full relative">
+                      <div className="flex-1 gap-2 min-w-0">
                         <span className="font-semibold text-gray-900">
                           {conversation.conversation_title}
                         </span>
                         {conversation.latest_message && (
-                          <p className="text-sm text-gray-500 truncate max-w-lg">{conversation.latest_message}</p>
+                          <p className="text-sm text-gray-500 truncate">{conversation.latest_message}</p>
                         )}
                       </div>
-                      <div className="absolute right-0 top-0 flex flex-col gap-1 items-end pt-1">
+                      <div className="flex-shrink-0 flex flex-col gap-1 items-end">
                         {conversation.latest_message_created_at && (
-                          <p className="text-xs text-gray-500">{formatTime(conversation.latest_message_created_at)}</p>
+                          <p className={`text-xs ${conversation.unread_count > 0 ? "text-blue-600 font-bold" : "text-gray-500"}`}>
+                            {formatTime(conversation.latest_message_created_at)}
+                          </p>
                         )}
                         {conversation.unread_count > 0 && (
                           <div className="relative flex items-center justify-center w-6 h-6">

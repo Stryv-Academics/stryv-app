@@ -55,6 +55,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const [conversationName, setConversationName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const closeModal = () => setSelectedImage(null);
 
@@ -256,7 +257,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       .eq("id", messages[0].conversation_id);
       if (error) {
         console.error("Error fetching conversation name:", error);
-      } else if (!data || data?.[0]?.title === null) {
+      } else if (!data || data?.[0]?.title === null || data?.[0]?.title === "") {
         const { data: conversationData, error: conversationError } = await supabase
             .from("conversation_participants")
             .select("user_id")
@@ -361,6 +362,12 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     markMessagesAsRead();
   }, [messages, userId]);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
   console.log(messages);
   if (!messages[0].first_name) {
     return (
@@ -453,7 +460,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                         {msg?.created_at ? formatTime(msg.created_at) : ""}
                       </i>
                     </span>
-                    <span>{msg.read ? "Read" : "Unread"}</span>
                   </div>
                 </div>
                 ))}
@@ -495,10 +501,18 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              ref={textareaRef}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("sendMessageBtn")?.click();
+                }
+              }}
               placeholder="Type your message..."
               className="flex-grow p-2 border rounded resize-none h-10"
             />
             <Button
+              id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
                 newMessage.trim() === ""
@@ -614,7 +628,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       {msg?.created_at ? formatTime(msg.created_at) : ""}
                     </i>
                   </span>
-                  <span>{msg.read ? "Read" : "Unread"}</span>
                 </div>
               </div>
               ))}
@@ -656,10 +669,18 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              ref={textareaRef}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("sendMessageBtn")?.click();
+                }
+              }}
               placeholder="Type your message..."
               className="flex-grow p-2 border rounded resize-none h-10"
             />
             <Button
+              id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
                 newMessage.trim() === ""
