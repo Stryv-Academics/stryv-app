@@ -2,6 +2,11 @@ import { createClient } from "@/utils/supabase/server";
 
 export const fetchMessages = async (conversation_id: string, offset: number, limit: number) => {
     const supabase = await createClient();
+    const { data: { user }, error: userError, } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        console.error("Auth session missing or error fetching user:", userError);
+    }
 
     const { data: conversation, error: conversationError } = await supabase
         .from("conversations")
@@ -24,14 +29,27 @@ export const fetchMessages = async (conversation_id: string, offset: number, lim
         console.error("Error fetching messages:", error.message);
         return [];
     }
+
+    const { data: readReceipts, error: receiptError } = await supabase
+        .from("message_reads")
+        .select("message_id")
+        .eq("user_id", user?.id);
+    if (receiptError) {
+        console.error("Error fetching read receipts:", receiptError);
+        return [];
+    }
+    const readMessageIds = new Set(readReceipts.map((receipt) => receipt.message_id));
+    const messagesWithReadStatus = messages.map((message) => ({
+        ...message,
+        read: readMessageIds.has(message.id), 
+    }));
     //note that the existence of a title is being used to determine if a conversation is a private or group chat
     //hence private conversations should not have titles, and group chats must have titles.
     if (conversation[0].title === null) {
-        console.log("This is a private conversation");
-        return messages;
+        return messagesWithReadStatus;
     } else {
         const messagesWithFirstNames = await Promise.all(
-            messages.map(async (msg: any) => {
+            messagesWithReadStatus.map(async (msg: any) => {
                 const { data: profiles, error } = await supabase
                     .from("accounts")
                     .select("first_name")

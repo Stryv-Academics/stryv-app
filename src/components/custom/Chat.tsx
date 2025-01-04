@@ -22,6 +22,7 @@ interface MessageProp {
   created_at: string;
   sender_id: string | null;
   first_name: string | null;
+  read: boolean;
 }
 
 interface ChatProps {
@@ -100,6 +101,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             created_at: data.created_at,
             sender_id: data.sender_id,
             first_name: data.first_name || null,
+            read: false,
           },
         ];
       });
@@ -195,6 +197,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       created_at: new Date().toISOString(),
       sender_id: user.id,
       first_name: profile[0].first_name || null,
+      read: false,
     };
 
     setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
@@ -319,6 +322,44 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     }
   }, [groupedMessages]);
 
+  const markMessageAsRead = async (message_id: string | null) => {
+    const { error } = await supabase
+        .from("message_reads")
+        .upsert([
+            {
+                message_id,
+                user_id: userId,
+                read_at: new Date().toISOString(),
+            },
+        ]);
+
+    if (error) {
+        console.error("Error marking message as read:", error);
+    } else {
+        // Update the local state to reflect the read status
+        setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+                msg.id === message_id ? { ...msg, read: true } : msg
+            )
+        );
+    }
+  };
+  //console.log(userId);
+  useEffect(() => {
+    /* if (!userId) {
+      console.error("User ID is not available.");
+      return;
+    } */
+    const markMessagesAsRead = async () => {
+        // Check if any message hasn't been read yet and mark it as read
+        const unreadMessages = messages.filter((message) => !message.read);
+
+        for (const message of unreadMessages) {
+            await markMessageAsRead(message.id);
+        }
+    };
+    markMessagesAsRead();
+  }, [messages, userId]);
 
   console.log(messages);
   if (!messages[0].first_name) {
@@ -412,6 +453,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                         {msg?.created_at ? formatTime(msg.created_at) : ""}
                       </i>
                     </span>
+                    <span>{msg.read ? "Read" : "Unread"}</span>
                   </div>
                 </div>
                 ))}
@@ -573,6 +615,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                       {msg?.created_at ? formatTime(msg.created_at) : ""}
                     </i>
                   </span>
+                  <span>{msg.read ? "Read" : "Unread"}</span>
                 </div>
               </div>
               ))}
