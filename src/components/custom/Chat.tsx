@@ -492,12 +492,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
-            <Input
-              type="text"
+            <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-grow p-2 border rounded"
+              className="flex-grow p-2 border rounded resize-none h-10"
             />
             <Button
               type="submit"
@@ -654,12 +653,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
-            <Input
-              type="text"
+            <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-grow p-2 border rounded"
+              className="flex-grow p-2 border rounded resize-none h-10"
             />
             <Button
               type="submit"
