@@ -53,9 +53,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [conversationName, setConversationName] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editableRef = useRef<HTMLDivElement>(null);
 
   const closeModal = () => setSelectedImage(null);
 
@@ -374,7 +376,41 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     }
   }, []);
 
-  console.log(messages);
+  const handleFileChange = (e: any) => {
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+    if (selectedFile) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        alert(`File size exceeds the limit of 1MB. Please select a smaller file.`);
+        e.target.value = "";
+        return;
+      }
+  
+      setFile(selectedFile);
+  
+      if (selectedFile.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (typeof event.target?.result === "string") {
+            setImagePreview(event.target.result);
+          }
+        };
+        reader.readAsDataURL(selectedFile);
+      }
+    }
+  };
+
+  const handleTextChange = (e: any) => {
+    setNewMessage(e.target.value);
+  };
+
+  const removeFilePreview = () => {
+    setImagePreview(null);
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
@@ -474,27 +510,11 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
           <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 w-full"
-            style={{ height: "auto" }}
-          >
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
             <Input
               type="file"
               accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
-              onChange={(e) => {
-                const selectedFile = e.target.files ? e.target.files[0] : null;
-                if (selectedFile) {
-                  if (selectedFile.size > MAX_FILE_SIZE) {
-                    alert(
-                      `File size exceeds the limit of 1MB. Please select a smaller file.`
-                    );
-                    e.target.value = "";
-                    return;
-                  }
-                  setFile(selectedFile);
-                }
-              }}
+              onChange={handleFileChange}
               ref={fileInputRef}
               className="hidden"
             />
@@ -505,7 +525,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
-            <textarea
+            {/* <textarea
               value={newMessage}
               onChange={(e) => {
                 setNewMessage(e.target.value);
@@ -528,7 +548,37 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 minHeight: '2.5rem',
                 maxHeight: '10rem'
               }}
-            />
+            /> */}
+            <div className="flex-grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
+              {imagePreview && (
+                <div className="relative">
+                  <img src={imagePreview} alt="Image preview"
+                    className="max-w-[200px] h-auto mt-2 mb-2 object-contain border rounded cursor-pointer"
+                  />
+                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                </div>
+              )}
+              {file && (file.type === "application/pdf" || file.name.endsWith(".pdf") || file.name.endsWith(".docx")) && (
+                <div className="relative mt-2 mb-2 p-2 border rounded bg-white">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">{file.name}</span>
+                    <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                  </div>
+                </div>
+              )}
+              <textarea
+                value={newMessage}
+                onChange={handleTextChange}
+                className="w-full h-auto resize-none border-none outline-none bg-transparent"
+                placeholder="Type your message..."
+                style={{
+                  minHeight: "2.5rem",
+                  maxHeight: "10rem",
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "break-word",
+                }}
+              />
+            </div>
             <Button
               id="sendMessageBtn"
               type="submit"
@@ -654,29 +704,14 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
           <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 w-full"
-          >
-            <Input
-              type="file"
-              accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
-              onChange={(e) => {
-                const selectedFile = e.target.files ? e.target.files[0] : null;
-                if (selectedFile) {
-                  if (selectedFile.size > MAX_FILE_SIZE) {
-                    alert(
-                      `File size exceeds the limit of 1MB. Please select a smaller file.`
-                    );
-                    e.target.value = "";
-                    return;
-                  }
-                  setFile(selectedFile);
-                }
-              }}
-              ref={fileInputRef}
-              className="hidden"
-            />
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
+          <Input
+            type="file"
+            accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            className="hidden"
+          />
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -684,19 +719,36 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              ref={textareaRef}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  document.getElementById("sendMessageBtn")?.click();
-                }
-              }}
-              placeholder="Type your message..."
-              className="flex-grow p-2 border rounded resize-none h-10"
-            />
+            <div className="flex-grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
+              {imagePreview && (
+                <div className="relative">
+                  <img src={imagePreview} alt="Image preview"
+                    className="max-w-[200px] h-auto mt-2 mb-2 object-contain border rounded cursor-pointer"
+                  />
+                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                </div>
+              )}
+              {file && (file.type === "application/pdf" || file.name.endsWith(".pdf") || file.name.endsWith(".docx")) && (
+                <div className="relative mt-2 mb-2 p-2 border rounded bg-white">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">{file.name}</span>
+                    <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                  </div>
+                </div>
+              )}
+              <textarea
+                value={newMessage}
+                onChange={handleTextChange}
+                className="w-full h-auto resize-none border-none outline-none bg-transparent"
+                placeholder="Type your message..."
+                style={{
+                  minHeight: "2.5rem",
+                  maxHeight: "10rem",
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "break-word",
+                }}
+              />
+            </div>
             <Button
               id="sendMessageBtn"
               type="submit"
