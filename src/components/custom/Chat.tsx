@@ -477,6 +477,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-2 w-full"
+            style={{ height: "auto" }}
           >
             <Input
               type="file"
@@ -506,7 +507,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             </Button>
             <textarea
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                e.target.style.height = '2.5rem';
+                if (e.target.scrollHeight > e.target.clientHeight) {
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }
+              }}
               ref={textareaRef}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -515,7 +522,12 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 }
               }}
               placeholder="Type your message..."
-              className="flex-grow p-2 border rounded resize-none h-10"
+              className="flex-grow p-2 border rounded resize-none overflow-hidden"
+              style={{ 
+                height: '2.5rem',
+                minHeight: '2.5rem',
+                maxHeight: '10rem'
+              }}
             />
             <Button
               id="sendMessageBtn"
