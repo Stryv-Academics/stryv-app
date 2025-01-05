@@ -75,7 +75,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       setUserId(user.id); // Set user ID to state
     };
     fetchUser();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -332,7 +332,10 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 user_id: userId,
                 read_at: new Date().toISOString(),
             },
-        ]);
+        ], {
+          onConflict: "user_id,message_id",
+          ignoreDuplicates: true
+        });
 
     if (error) {
         console.error("Error marking message as read:", error);
@@ -347,14 +350,17 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   };
   //console.log(userId);
   useEffect(() => {
-    /* if (!userId) {
-      console.error("User ID is not available.");
+    if (!userId) {
+      //console.error("User ID is not available.");
       return;
+    }
+    /* if (userId) {
+      console.log("User ID ready", userId);
     } */
     const markMessagesAsRead = async () => {
         // Check if any message hasn't been read yet and mark it as read
-        const unreadMessages = messages.filter((message) => !message.read);
-
+        const unreadMessages = messages.filter((message) => !message.read && message.sender_id !== userId);
+        
         for (const message of unreadMessages) {
             await markMessageAsRead(message.id);
         }
