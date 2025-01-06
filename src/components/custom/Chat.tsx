@@ -122,22 +122,31 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error(
-        "Error fetching user:",
-        userError?.message || "No user found"
-      );
-      return;
-    }
+    const fileExtension = file?.name.split('.').pop()?.toLowerCase();
+
+    const tempMessage: MessageProp = {
+      id: null,
+      conversation_id: conversation_id,
+      content: newMessage,
+      message_type: fileExtension ? fileExtension : null,
+      attachment_url: file ? URL.createObjectURL(file) : null, // Show local preview for file
+      attachment_name: file? file.name : null,
+      created_at: new Date().toISOString(),
+      sender_id: userId,
+      first_name: null, // not necessary for user's own message
+      current_user_is_sender: true,
+      read: false,
+    };
+
+    setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
+    setNewMessage(""); // clear input field
+    setFile(null);
+    setImagePreview(null);
 
     const { data: profile, error: profileError } = await supabase
       .from("accounts")
       .select("first_name")
-      .eq("id", user.id);
+      .eq("id", userId);
     if (profileError || !profile) {
       console.error("Error fetching profile:", profileError || "No profile found");
       return;
@@ -169,25 +178,6 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       attachment_name = file.name;
     }
 
-    const tempMessage: MessageProp = {
-      id: null,
-      conversation_id: conversation_id,
-      content: newMessage,
-      message_type: message_type,
-      attachment_url: file ? URL.createObjectURL(file) : null, // Show local preview for file
-      attachment_name: attachment_name,
-      created_at: new Date().toISOString(),
-      sender_id: user.id,
-      first_name: profile[0].first_name || null,
-      current_user_is_sender: true,
-      read: false,
-    };
-
-    setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
-    setNewMessage(""); // clear input field
-    setFile(null);
-    setImagePreview(null);
-
     try {
       const { data: insertData, error: insertError } = await supabase
         .from("messages")
@@ -195,7 +185,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
           {
             content: newMessage,
             conversation_id: conversation_id,
-            sender_id: user.id,
+            sender_id: userId,
             attachment_url: attachment_url,
             message_type: message_type,
           },
@@ -214,7 +204,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       }
 
       const eventData = {
-        sender_id: user.id,
+        sender_id: userId,
         content: newMessage,
         first_name: profile[0].first_name || null,
         created_at: formatDateTime(new Date().toISOString()),
@@ -363,7 +353,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       fileInputRef.current.value = "";
     }
   };
-
+  console.log(messages);
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
@@ -418,24 +408,16 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                                             </video>
                                         </div>
                                     )} */}
-                    {msg.message_type === "pdf" && msg.attachment_url && (
+                    {(msg.message_type === "pdf" || msg.message_type === "docx") && msg.attachment_url && (
                       <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
                       >
                         <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
                           <File className="w-4 h-4" />
                         </div>
-                        <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
-                      </a>
-                    )}
-                    {msg.message_type === "docx" && msg.attachment_url && (
-                      <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
-                      >
-                        <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                          <File className="w-4 h-4" />
-                        </div>
-                        <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
+                        <span>
+                          {msg.attachment_name || msg.attachment_url.split("-").pop()}
+                        </span>
                       </a>
                     )}
                     <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
@@ -583,24 +565,16 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                                           </video>
                                       </div>
                                   )} */}
-                  {msg.message_type === "pdf" && msg.attachment_url && (
+                  {(msg.message_type === "pdf" || msg.message_type === "docx") && msg.attachment_url && (
                     <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
                       className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
                     >
                       <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
                         <File className="w-4 h-4" />
                       </div>
-                      <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
-                    </a>
-                  )}
-                  {msg.message_type === "docx" && msg.attachment_url && (
-                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
-                    >
-                      <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                        <File className="w-4 h-4" />
-                      </div>
-                      <span>{msg.attachment_name}{" "}{msg.attachment_url.split("-").pop()}</span>
+                      <span>
+                        {msg.attachment_name || msg.attachment_url.split("-").pop()}
+                      </span>
                     </a>
                   )}
                   <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>

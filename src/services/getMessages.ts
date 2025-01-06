@@ -22,7 +22,7 @@ export const fetchMessages = async (conversation_id: string, offset: number, lim
         .from("messages")
         .select("*")
         .eq("conversation_id", conversation_id)
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
 
     if (error) {
@@ -30,7 +30,7 @@ export const fetchMessages = async (conversation_id: string, offset: number, lim
         return [];
     }
 
-    const messagesWithStyle = messages.map(msg => ({
+    const messagesWithStyle = messages.reverse().map(msg => ({
         ...msg,
         current_user_is_sender: msg.sender_id === user?.id,
     }))
