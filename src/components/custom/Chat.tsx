@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { triggerPusherEvent } from "@/services/triggerPusherEvent";
+import uploadFile from "@/services/uploadFile";
 import Link from "next/link";
 import Pusher from "pusher-js";
 import { Send, ArrowLeft, File, X } from "lucide-react";
@@ -28,7 +29,8 @@ interface MessageProp {
 
 interface ChatProps {
   initialMessages: MessageProp[];
-  conversation_id: any;
+  conversation_id: string;
+  conversation_name: string;
 }
 
 interface GroupedMessages {
@@ -47,13 +49,12 @@ const formatDateTime = (isoString: string | null) => {
   });
 };
 
-const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
+const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps) => {
   const [messages, setMessages] = useState(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [conversationName, setConversationName] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,29 +117,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       channel.unsubscribe();
     };
   }, [userId]);
-
-  const uploadFile = async (file: File) => {
-    if (file.size > MAX_FILE_SIZE) {
-      return { url: "", type: "" };
-    }
-    const file_path = `${Date.now()}-${file.name}`;
-
-    const { data, error } = await supabase.storage
-      .from("attachments")
-      .upload(file_path, file);
-    if (error) {
-      console.error("Error uploading file:", error.message);
-      return { url: "", type: "" };
-    }
-
-    const { data: publicUrl } = supabase.storage
-      .from("attachments")
-      .getPublicUrl(file_path);
-    return {
-      url: publicUrl.publicUrl || "",
-      type: file.type,
-    };
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,6 +186,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
     setMessages((prevMessages) => [...prevMessages, tempMessage]); // Optimistic update
     setNewMessage(""); // clear input field
     setFile(null);
+    setImagePreview(null);
 
     try {
       const { data: insertData, error: insertError } = await supabase
@@ -252,33 +231,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       console.error("Unexpected error:", err);
     }
   };
-
-  const getConversationName = async () => {
-    if (messages.length > 0) {
-      const { data, error } = await supabase
-      .from("conversations")
-      .select("title")
-      .eq("id", messages[0].conversation_id);
-      if (error) {
-        console.error("Error fetching conversation name:", error);
-      } else if (!data || data?.[0]?.title === null || data?.[0]?.title === "") {
-        const { data: conversationData, error: conversationError } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", messages[0].conversation_id);
-        const { data: accountData, error: accountError } = await supabase
-            .from("accounts")
-            .select("first_name")
-            .eq("id", conversationData?.[0]?.user_id);
-        setConversationName(accountData?.[0]?.first_name);
-      } else {
-        setConversationName(data?.[0]?.title || "Untitled Conversation");
-      }
-    }
-  }
-  useEffect(() => {
-    getConversationName();
-  }, []);
 
   const groupMessagesByDate = (msgs: MessageProp[]): GroupedMessages => {
     return msgs.reduce((acc: GroupedMessages, msg: MessageProp) => {
@@ -393,10 +345,15 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
         reader.readAsDataURL(selectedFile);
       }
     }
+    textareaRef.current?.focus();
   };
 
   const handleTextChange = (e: any) => {
     setNewMessage(e.target.value);
+    e.target.style.height = '1.5rem';
+    if (e.target.scrollHeight > e.target.clientHeight) {
+      e.target.style.height = `${e.target.scrollHeight}px`;
+    }
   };
 
   const removeFilePreview = () => {
@@ -406,7 +363,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       fileInputRef.current.value = "";
     }
   };
-  console.log(messages);
+
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
@@ -418,7 +375,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
               </Button>
             </Link>
             <h2 className="text-xl font-semibold text-gray-900">
-              {conversationName}
+              {conversation_name}
             </h2>
           </div>
         </div>
@@ -510,30 +467,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             >
               <File className="w-4 h-4" />
             </Button>
-            {/* <textarea
-              value={newMessage}
-              onChange={(e) => {
-                setNewMessage(e.target.value);
-                e.target.style.height = '2.5rem';
-                if (e.target.scrollHeight > e.target.clientHeight) {
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }
-              }}
-              ref={textareaRef}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  document.getElementById("sendMessageBtn")?.click();
-                }
-              }}
-              placeholder="Type your message..."
-              className="flex-grow p-2 border rounded resize-none overflow-hidden"
-              style={{ 
-                height: '2.5rem',
-                minHeight: '2.5rem',
-                maxHeight: '10rem'
-              }}
-            /> */}
             <div className="flex-grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
               {imagePreview && (
                 <div className="relative">
@@ -551,15 +484,23 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 </div>
               )}
               <textarea
+                ref={textareaRef}
                 value={newMessage}
                 onChange={handleTextChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("sendMessageBtn")?.click();
+                  }
+                }}
                 className="w-full h-auto resize-none border-none outline-none bg-transparent"
                 placeholder="Type your message..."
                 style={{
-                  minHeight: "2.5rem",
-                  maxHeight: "10rem",
+                  height: "1.5rem",
                   whiteSpace: "pre-wrap",
                   overflowWrap: "break-word",
+                  lineHeight: "1.5rem",
+                  overflow: "hidden",
                 }}
               />
             </div>
@@ -597,7 +538,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
               </Button>
             </Link>
             <h2 className="text-xl font-semibold text-gray-900">
-              {conversationName}
+              {conversation_name}
             </h2>
           </div>
         </div>
@@ -708,15 +649,23 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
                 </div>
               )}
               <textarea
+                ref={textareaRef}
                 value={newMessage}
                 onChange={handleTextChange}
-                className="w-full h-auto resize-none border-none outline-none bg-transparent"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("sendMessageBtn")?.click();
+                  }
+                }}
+                className="w-full h-auto resize-none border-none outline-none bg-transparent block"
                 placeholder="Type your message..."
                 style={{
-                  minHeight: "2.5rem",
-                  maxHeight: "10rem",
+                  height: "1.5rem",
                   whiteSpace: "pre-wrap",
                   overflowWrap: "break-word",
+                  lineHeight: "1.5rem",
+                  overflow: "hidden",
                 }}
               />
             </div>
