@@ -30,6 +30,11 @@ export const fetchMessages = async (conversation_id: string, offset: number, lim
         return [];
     }
 
+    const messagesWithStyle = messages.map(msg => ({
+        ...msg,
+        current_user_is_sender: msg.sender_id === user?.id,
+    }))
+
     const { data: readReceipts, error: receiptError } = await supabase
         .from("message_reads")
         .select("message_id")
@@ -39,7 +44,7 @@ export const fetchMessages = async (conversation_id: string, offset: number, lim
         return [];
     }
     const readMessageIds = new Set(readReceipts.map((receipt) => receipt.message_id));
-    const messagesWithReadStatus = messages.map((message) => ({
+    const messagesWithReadStatus = messagesWithStyle.map((message) => ({
         ...message,
         read: readMessageIds.has(message.id), 
     }));

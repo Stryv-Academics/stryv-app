@@ -22,6 +22,7 @@ interface MessageProp {
   created_at: string;
   sender_id: string | null;
   first_name: string | null;
+  current_user_is_sender: boolean;
   read: boolean;
 }
 
@@ -57,7 +58,6 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const editableRef = useRef<HTMLDivElement>(null);
 
   const closeModal = () => setSelectedImage(null);
 
@@ -104,6 +104,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             created_at: data.created_at,
             sender_id: data.sender_id,
             first_name: data.first_name || null,
+            current_user_is_sender: true,
             read: false,
           },
         ];
@@ -200,6 +201,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       created_at: new Date().toISOString(),
       sender_id: user.id,
       first_name: profile[0].first_name || null,
+      current_user_is_sender: true,
       read: false,
     };
 
@@ -353,16 +355,10 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
   //console.log(userId);
   useEffect(() => {
     if (!userId) {
-      //console.error("User ID is not available.");
       return;
     }
-    /* if (userId) {
-      console.log("User ID ready", userId);
-    } */
     const markMessagesAsRead = async () => {
-        // Check if any message hasn't been read yet and mark it as read
         const unreadMessages = messages.filter((message) => !message.read && message.sender_id !== userId);
-        
         for (const message of unreadMessages) {
             await markMessageAsRead(message.id);
         }
@@ -410,7 +406,7 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
       fileInputRef.current.value = "";
     }
   };
-
+  console.log(messages);
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
@@ -433,18 +429,13 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
               {msgs.map((msg, index) => (
                 <div
                   key={msg.id}
-                  className={`flex ${
-                    msg.sender_id === userId ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${msg.current_user_is_sender ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[70%] rounded-lg p-3 ${
-                      msg.sender_id === userId
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
+                      msg.current_user_is_sender ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
                     style={{
-                      marginTop: index > 0 && msgs[index - 1].sender_id === msg.sender_id ? '0.15rem' : '0.5rem',
+                      marginTop: index > 0 && msgs[index - 1].current_user_is_sender ? '0.15rem' : '0.5rem',
                     }}
                   >
                     {msg.message_type === "image" && msg.attachment_url && (
@@ -617,18 +608,12 @@ const Chat = ({ initialMessages, conversation_id }: ChatProps) => {
             {msgs.map((msg, index) => (
               <div
                 key={msg.id}
-                className={`flex ${
-                  msg.sender_id === userId ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${msg.current_user_is_sender ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg p-3 ${
-                    msg.sender_id === userId
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-900"
-                  }`}
+                  className={`max-w-[70%] rounded-lg p-3 ${msg.current_user_is_sender ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
                   style={{
-                    marginTop: index > 0 && msgs[index - 1].sender_id === msg.sender_id ? '0.15rem' : '0.5rem',
+                    marginTop: index > 0 && msgs[index - 1].current_user_is_sender ? '0.15rem' : '0.5rem',
                   }}
                 >
                   {msg.sender_id !== userId && (
