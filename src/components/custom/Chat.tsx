@@ -490,11 +490,11 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
               id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
-                newMessage.trim() === ""
+                newMessage.trim() === "" && !file
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
-              disabled={newMessage.trim() === ""}
+              disabled={newMessage.trim() === "" && !file}
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -647,11 +647,11 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
               id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
-                newMessage.trim() === ""
+                newMessage.trim() === "" && !file
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
-              disabled={newMessage.trim() === ""}
+              disabled={newMessage.trim() === "" && !file}
             >
               <Send className="w-4 h-4" />
             </Button>
