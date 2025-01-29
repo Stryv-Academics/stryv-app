@@ -11,7 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({ userData }: SidebarProps) {
   return (
-    <Card className="w-[25%] shadow-lg border-r border-gray-200 flex flex-col">
+    <Card className="w-[25%] shadow-lg border-r border-gray-200 flex flex-col flex-shrink-0">
       {/* Logo Section */}
       <div className="p-4 flex items-center justify-center lg:justify-start gap-4">
         <SVGLogo />
