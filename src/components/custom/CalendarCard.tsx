@@ -10,9 +10,9 @@ export default function CalendarCard() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
 
   return (
-    <Card className="p-6 shadow-sm rounded-lg bg-gradient-to-b from-white to-gray-50">
+    <Card className="p-6 shadow-xs rounded-lg bg-linear-to-b from-white to-gray-50">
       <div className="flex justify-between items-center mb-4">
-        <span className="text-xl font-semibold text-gray-900 px-5 py-2 rounded-full shadow-sm">
+        <span className="text-xl font-semibold text-gray-900 px-5 py-2 rounded-full shadow-xs">
           Schedule
         </span>
         <Button
@@ -32,7 +32,7 @@ export default function CalendarCard() {
             mode="single"
             selected={date}
             onSelect={setDate}
-            className="rounded-md border shadow-sm p-2"
+            className="rounded-md border shadow-xs p-2"
             fixedWeeks
           />
         </div>

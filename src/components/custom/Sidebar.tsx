@@ -11,7 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({ userData }: SidebarProps) {
   return (
-    <Card className="w-[25%] shadow-lg border-r border-gray-200 flex flex-col flex-shrink-0">
+    <Card className="w-[25%] shadow-lg border-r border-gray-200 flex flex-col shrink-0">
       {/* Logo Section */}
       <div className="p-4 flex items-center justify-center lg:justify-start gap-4">
         <SVGLogo />
@@ -22,7 +22,7 @@ export default function Sidebar({ userData }: SidebarProps) {
       <Separator />
 
       {/* Menu Section */}
-      <ScrollArea className="flex-grow p-4">
+      <ScrollArea className="grow p-4">
         <Menu userData={userData} />
       </ScrollArea>
 

@@ -19,7 +19,7 @@ const Progress = () => {
   return (
     <div className="p-4 flex-1">
       <div className="flex justify-between items-center mb-4">
-        <span className="text-xl font-semibold bg-white px-5 py-2 rounded-full shadow-sm">
+        <span className="text-xl font-semibold bg-white px-5 py-2 rounded-full shadow-xs">
           Learning Progress
         </span>
         <button

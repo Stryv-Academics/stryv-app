@@ -51,14 +51,14 @@ export default function ProgressPage() {
                 </p>
             </div>
 
-            <Card className="shadow-sm rounded-lg flex-1 overflow-hidden bg-white">
+            <Card className="shadow-xs rounded-lg flex-1 overflow-hidden bg-white">
                 <div className="p-6 space-y-6">
                     <h2 className="text-lg font-semibold text-gray-900">Assignments</h2>
                     <div className="space-y-4">
                         {assignments.map((assignment) => (
                             <div
                                 key={assignment.id}
-                                className="p-4 rounded-lg shadow-sm border border-gray-200 bg-white flex items-start gap-4"
+                                className="p-4 rounded-lg shadow-xs border border-gray-200 bg-white flex items-start gap-4"
                             >
                                 <div className="flex flex-col w-full">
                                     <div className="flex justify-between items-center mb-2">
