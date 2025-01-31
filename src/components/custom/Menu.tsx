@@ -32,21 +32,33 @@ const menuSections = [
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {
+        icon: "/message.png",
+        label: "Messages",
+        action: "/messages",
+        visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
+      },
+      {
         icon: "/assignment.png",
         label: "Progress",
         action: "/progress",
-        visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
+        visible: [Roles.ADMIN, Roles.STUDENT, Roles.PARENT],
+      },
+      {
+        icon: "/lesson.png",
+        label: "Lessons",
+        action: "/lessons",
+        visible: [Roles.ADMIN, Roles.TUTOR],
+      },
+      {
+        icon: "/resource.png",
+        label: "Resources",
+        action: "/resources",
+        visible: [Roles.ADMIN, Roles.TUTOR],
       },
       {
         icon: "/profile.png",
         label: "Profile",
         action: "/profile",
-        visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
-      },
-      {
-        icon: "/message.png",
-        label: "Messages",
-        action: "/messages",
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
       },
       {
