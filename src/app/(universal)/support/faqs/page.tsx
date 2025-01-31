@@ -50,7 +50,7 @@ export default function FAQ() {
               How do I reset my password?
             </h2>
             <p className="text-sm text-gray-600 mt-2">
-              Click "Forgot Password" on the login page and follow the
+              Click &quot;Forgot Password&quot; on the login page and follow the
               instructions to reset your password.
             </p>
           </div>

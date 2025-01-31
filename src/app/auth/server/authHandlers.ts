@@ -14,7 +14,7 @@ export const signIn = validatedAction(signInSchema, async (data) => {
   const supabase = await createClient();
   const { email, password } = data;
 
-  const { data: signInData, error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -33,10 +33,10 @@ const signUpSchema = z.object({
   // inviteId: z.string().optional(),
 });
 
-export const signUp = validatedAction(signUpSchema, async (data, formData) => {
+export const signUp = validatedAction(signUpSchema, async (data) => {
   const supabase = await createClient();
   const { email, password } = data;
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
   });
