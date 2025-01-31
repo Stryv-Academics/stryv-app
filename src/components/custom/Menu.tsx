@@ -6,14 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Account, Role, Roles } from "@/types";
 import Link from "next/link";
 import { signOut } from "@/app/auth/client/authHandlers";
-
-interface MenuItem {
-  icon: string;
-  label: string;
-  action: string;
-  visible: Role[];
-  isLogout?: boolean;
-}
+import Image from "next/image";
 
 const menuSections = [
   {
@@ -135,7 +128,7 @@ export default function Menu({ userData }: { userData: Account }) {
                     className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
                     onClick={async () => await signOut()}
                   >
-                    <img src={item.icon} alt={item.label} className="w-5 h-5" />
+                    <Image src={item.icon} alt={item.label} className="w-5 h-5" />
                     <span className="text-sm">{item.label}</span>
                   </Button>
                 ) : (
@@ -146,7 +139,7 @@ export default function Menu({ userData }: { userData: Account }) {
                       className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
                           src={item.icon}
                           alt={item.label}
                           className="w-5 h-5"
@@ -165,7 +158,7 @@ export default function Menu({ userData }: { userData: Account }) {
 
       {/* Profile Section */}
       <div className="flex items-center gap-4">
-        <img
+        <Image
           src="/avatar.png"
           alt="Avatar"
           className="rounded-full w-10 h-10"

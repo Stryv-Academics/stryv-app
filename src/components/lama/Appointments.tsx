@@ -11,7 +11,7 @@ const Appointments = () => {
       </div>
       <div className="rounded-2xl p-1 flex-1 mt-4 border border-gray-300">
         <div className="text-[20px] font-semibold my-2 text-gray-400 text-center">
-          Let's change that
+          Let&apos;s change that
         </div>
       </div>
     </div>
