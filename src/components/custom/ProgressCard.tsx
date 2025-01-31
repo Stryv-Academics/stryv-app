@@ -4,9 +4,9 @@ import { Card } from "../ui/card";
 
 export default function Progress() {
   return (
-    <Card className="p-6 shadow-sm rounded-lg bg-gradient-to-b from-white to-gray-50">
+    <Card className="p-6 shadow-xs rounded-lg bg-linear-to-b from-white to-gray-50">
       <div className="flex justify-between items-center mb-4">
-        <span className="text-xl font-semibold text-gray-900 px-5 py-2 rounded-full shadow-sm">
+        <span className="text-xl font-semibold text-gray-900 px-5 py-2 rounded-full shadow-xs">
           Learning Progress
         </span>
         <Button

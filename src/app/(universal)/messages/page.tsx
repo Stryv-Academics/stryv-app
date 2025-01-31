@@ -103,9 +103,9 @@ const MessagesPage = async () => {
 
   return (
     <div className="max-w-full h-screen mx-auto p-6 bg-white flex flex-col">
-      <Card className="shadow-sm rounded-lg flex-1 overflow-hidden">
+      <Card className="shadow-xs rounded-lg flex-1 overflow-hidden">
         <div className="h-full flex flex-col">
-          <div className="p-6 flex-shrink-0">
+          <div className="p-6 shrink-0">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center justify-start gap-2">
                 <Link href={`/`}>
@@ -123,7 +123,7 @@ const MessagesPage = async () => {
           <div className="w-full lg:w-1/0 flex flex-col gap-4 px-14">
             {conversations.map((conversation: any) => (
               <div key={conversation.conversation_id} className="flex items-center gap-4 w-full">
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 shrink-0">
                   <img src={conversation.profilePicture || "/default-profile.png"}
                     alt={`${conversation.conversation_title}'s profile`}
                     className="w-full h-full object-cover"
@@ -131,7 +131,7 @@ const MessagesPage = async () => {
                 </div>
                 <Link href={`/messages/${conversation.conversation_id}`} className="flex-1 min-w-0 max-w-full">
                   <div
-                    className="p-2 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-sm border border-gray-200"
+                    className="p-2 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-xs border border-gray-200"
                   >
                     <div className="flex my-1 w-full relative">
                       <div className="flex-1 gap-2 min-w-0">
@@ -142,7 +142,7 @@ const MessagesPage = async () => {
                           <p className="text-sm text-gray-500 truncate">{conversation.latest_message}</p>
                         )}
                       </div>
-                      <div className="flex-shrink-0 flex flex-col gap-1 items-end">
+                      <div className="shrink-0 flex flex-col gap-1 items-end">
                         {conversation.latest_message_created_at && (
                           <p className={`text-xs ${conversation.unread_count > 0 ? "text-blue-600 font-bold" : "text-gray-500"}`}>
                             {formatTime(conversation.latest_message_created_at)}

@@ -8,7 +8,7 @@ export default function FAQ() {
   const router = useRouter();
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-[100dvh] bg-linear-to-b from-white to-gray-50 flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Heading */}
         <h1 className="text-2xl font-semibold tracking-tight text-center text-gray-900">
@@ -23,7 +23,7 @@ export default function FAQ() {
         {/* FAQ List */}
         <div className="mt-10 space-y-6">
           {/* Question 1 */}
-          <div className="p-6 rounded-lg bg-blue-50 shadow-sm">
+          <div className="p-6 rounded-lg bg-blue-50 shadow-xs">
             <h2 className="text-lg font-medium text-gray-800">
               How do I contact support?
             </h2>
@@ -34,7 +34,7 @@ export default function FAQ() {
           </div>
 
           {/* Question 2 */}
-          <div className="p-6 rounded-lg bg-blue-50 shadow-sm">
+          <div className="p-6 rounded-lg bg-blue-50 shadow-xs">
             <h2 className="text-lg font-medium text-gray-800">
               What are your support hours?
             </h2>
@@ -45,7 +45,7 @@ export default function FAQ() {
           </div>
 
           {/* Question 3 */}
-          <div className="p-6 rounded-lg bg-blue-50 shadow-sm">
+          <div className="p-6 rounded-lg bg-blue-50 shadow-xs">
             <h2 className="text-lg font-medium text-gray-800">
               How do I reset my password?
             </h2>
@@ -60,7 +60,7 @@ export default function FAQ() {
         <div className="mt-10 space-y-6">
           <Button
             onClick={() => router.push("/")}
-            className="w-full h-12 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full h-12 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Go Home
           </Button>
@@ -68,7 +68,7 @@ export default function FAQ() {
           <Button
             variant="outline"
             onClick={() => router.back()}
-            className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-xs transition-all hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Go Back
           </Button>

@@ -357,7 +357,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
   if (!messages[0].first_name) {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
-        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow">
+        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <Link href={`/messages`}>
               <Button variant="ghost" size="sm" className="hover:bg-gray-100">
@@ -433,7 +433,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
           ))}
           <div ref={messagesEndRef} />
         </div>
-        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
+        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
             <Input
               type="file"
@@ -449,7 +449,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
             >
               <File className="w-4 h-4" />
             </Button>
-            <div className="flex-grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
+            <div className="grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
               {imagePreview && (
                 <div className="relative">
                   <img src={imagePreview} alt="Image preview"
@@ -475,7 +475,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                     document.getElementById("sendMessageBtn")?.click();
                   }
                 }}
-                className="w-full h-auto resize-none border-none outline-none bg-transparent"
+                className="w-full h-auto resize-none border-none outline-hidden bg-transparent"
                 placeholder="Type your message..."
                 style={{
                   height: "1.5rem",
@@ -490,11 +490,11 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
               id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
-                newMessage.trim() === ""
+                newMessage.trim() === "" && !file
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
-              disabled={newMessage.trim() === ""}
+              disabled={newMessage.trim() === "" && !file}
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -512,7 +512,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
   } else {
     return (
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
-        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow">
+        <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <Link href={`/messages`}>
               <Button variant="ghost" size="sm" className="hover:bg-gray-100">
@@ -590,7 +590,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
           ))}
           <div ref={messagesEndRef} />
         </div>
-        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow">
+        <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow-sm">
         <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
           <Input
             type="file"
@@ -606,7 +606,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
             >
               <File className="w-4 h-4" />
             </Button>
-            <div className="flex-grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
+            <div className="grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
               {imagePreview && (
                 <div className="relative">
                   <img src={imagePreview} alt="Image preview"
@@ -632,7 +632,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                     document.getElementById("sendMessageBtn")?.click();
                   }
                 }}
-                className="w-full h-auto resize-none border-none outline-none bg-transparent block"
+                className="w-full h-auto resize-none border-none outline-hidden bg-transparent block"
                 placeholder="Type your message..."
                 style={{
                   height: "1.5rem",
@@ -647,11 +647,11 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
               id="sendMessageBtn"
               type="submit"
               className={`px-4 py-2 rounded transition-all duration-200 ${
-                newMessage.trim() === ""
+                newMessage.trim() === "" && !file
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
-              disabled={newMessage.trim() === ""}
+              disabled={newMessage.trim() === "" && !file}
             >
               <Send className="w-4 h-4" />
             </Button>

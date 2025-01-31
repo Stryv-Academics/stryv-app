@@ -3,7 +3,7 @@ import { Card } from "../ui/card";
 
 export default function Welcome({ userData }: { userData: Account }) {
   return (
-    <Card className="p-6 shadow-sm">
+    <Card className="p-6 shadow-xs">
       <div className="flex items-center gap-4">
         <img
           src="/avatar.png"

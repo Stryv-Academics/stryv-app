@@ -24,7 +24,7 @@ const CalendarView = () => {
   return (
     <div className="p-4 flex-1">
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-xl font-semibold bg-white px-5 py-2 rounded-full shadow-sm flex items-center gap-2">
+        <span className="text-xl font-semibold bg-white px-5 py-2 rounded-full shadow-xs flex items-center gap-2">
           <CalendarDays className="w-5 h-5 text-blue-600" />
           Schedule Overview
         </span>

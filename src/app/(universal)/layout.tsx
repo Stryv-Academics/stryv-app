@@ -39,12 +39,12 @@ export default async function DashboardLayout({
   console.log("[DashboardLayout] User Data:", userData);
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-gray-50 flex">
+    <div className="min-h-[100dvh] bg-linear-to-b from-white to-gray-50 flex">
       {/* Left Sidebar */}
       <Sidebar userData={userData} />
 
       {/* Right Content Area */}
-      <div className="flex-grow bg-white overflow-scroll p-6">{children}</div>
+      <div className="grow bg-white overflow-scroll p-6">{children}</div>
     </div>
   );
 }
