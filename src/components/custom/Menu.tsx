@@ -12,7 +12,7 @@ interface MenuItem {
   label: string;
   action: string;
   visible: Role[];
-  isLogout?: boolean; // Optional flag for logout
+  isLogout?: boolean;
 }
 
 const menuSections = [
@@ -87,7 +87,7 @@ const menuSections = [
       {
         icon: "/logout.png",
         label: "Logout",
-        action: "", // No href since it uses a function
+        action: "",
         visible: [Roles.ADMIN, Roles.TUTOR, Roles.STUDENT, Roles.PARENT],
         isLogout: true,
       },
@@ -96,10 +96,25 @@ const menuSections = [
 ];
 
 export default function Menu({ userData }: { userData: Account }) {
-  const role = (userData.role as Role) ?? Roles.STUDENT;
-  const fullName = `${userData.first_name ?? "Guest"} ${userData.last_name ?? ""
-    }`.trim();
+  const role = userData.role as Role;
+  const fullName = `${userData.first_name ?? "Guest"} ${
+    userData.last_name ?? ""
+  }`.trim();
   const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
+
+  // Helper function to generate correct URL path
+  const getPath = (action: string): string => {
+    const globalPages = [
+      "/",
+      "/calendar",
+      "/contact-us",
+      "/messages",
+      "/progress",
+      "/settings",
+      "/support",
+    ];
+    return globalPages.includes(action) ? action : `/${role}${action}`;
+  };
 
   return (
     <ScrollArea className="p-4">
@@ -112,37 +127,36 @@ export default function Menu({ userData }: { userData: Account }) {
           <div className="space-y-2">
             {section.items
               .filter((item) => item.visible.includes(role))
-              .map((item) => (
-                <Button
-                  key={item.label}
-                  asChild={!item.isLogout} // Only use Link for non-logout buttons
-                  variant="ghost"
-                  className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
-                  onClick={
-                    item.isLogout ? async () => await signOut() : undefined
-                  } // Trigger signOut for logout button
-                >
-                  {item.isLogout ? (
-                    <>
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        className="w-5 h-5"
-                      />
-                      <span className="text-sm">{item.label}</span>
-                    </>
-                  ) : (
-                    <Link href={item.action}>
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        className="w-5 h-5"
-                      />
-                      <span className="text-sm">{item.label}</span>
-                    </Link>
-                  )}
-                </Button>
-              ))}
+              .map((item) =>
+                item.isLogout ? (
+                  <Button
+                    key={item.label}
+                    variant="ghost"
+                    className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
+                    onClick={async () => await signOut()}
+                  >
+                    <img src={item.icon} alt={item.label} className="w-5 h-5" />
+                    <span className="text-sm">{item.label}</span>
+                  </Button>
+                ) : (
+                  <Link key={item.label} href={getPath(item.action)}>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="w-5 h-5"
+                        />
+                        <span className="text-sm">{item.label}</span>
+                      </div>
+                    </Button>
+                  </Link>
+                )
+              )}
           </div>
         </div>
       ))}
