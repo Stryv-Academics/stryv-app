@@ -131,7 +131,8 @@ const MessagesPage = async () => {
                 </div>
                 <Link href={`/messages/${conversation.conversation_id}`} className="flex-1 min-w-0 max-w-full">
                   <div
-                    className="p-2 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-xs border border-gray-200"
+                    key={index}
+                    className="p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-xs border border-gray-200"
                   >
                     <div className="flex my-1 w-full relative">
                       <div className="flex-1 gap-2 min-w-0">

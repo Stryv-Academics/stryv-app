@@ -7,5 +7,5 @@ export interface Account {
   last_name?: string;
   username?: string;
   updated_at?: string;
-  role?: string;
+  role?: Role;
 };

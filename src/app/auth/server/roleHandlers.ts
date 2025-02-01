@@ -1,15 +1,17 @@
-import { Roles, type Account, type Role, type User } from "@/types"; // Import User type
+import { Roles, type Account, type Role, type User } from "@/types";
 import { fetchTableDataSingle } from "@/services/supabase/dataService";
 import { getUser } from "./userHandlers";
 
-export function isRole(role: any): role is Role {
-  return Object.values(Roles).includes(role);
+export function isRole(role: unknown): role is Role {
+  return (
+    typeof role === "string" && Object.values(Roles).includes(role as Role)
+  );
 }
 
 export const getUserRole = async (): Promise<Role | null> => {
   try {
     // Step 1: Fetch user ID
-    const user = await getUser();
+    const user: User | null = await getUser();
 
     // Step 2: Handle null/no user
     if (!user) {

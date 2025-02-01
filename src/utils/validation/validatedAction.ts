@@ -3,17 +3,16 @@ import { z } from "zod";
 export type ActionState = {
   error?: string;
   success?: string;
-  fieldData?: Record<string, any>; //eslint-disable-line
-  [key: string]: any; //eslint-disable-line
+  fieldData?: Record<string, unknown>;
+  [key: string]: unknown;
 };
 
-type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
-  //eslint-disable-line
+type ValidatedActionFunction<S extends z.ZodType<unknown, z.ZodTypeDef>, T> = (
   data: z.infer<S>,
   formData: FormData
 ) => Promise<T>;
 
-export function validatedAction<S extends z.ZodType<any, any>, T>( //eslint-disable-line
+export function validatedAction<S extends z.ZodType<unknown, z.ZodTypeDef>, T>(
   schema: S,
   action: ValidatedActionFunction<S, T>
 ) {
@@ -26,27 +25,3 @@ export function validatedAction<S extends z.ZodType<any, any>, T>( //eslint-disa
     return action(result.data, formData);
   };
 }
-
-/** 
-
-Example:
-
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-});
-
-const action = async (data: { name: string; email: string }) => {
-  return { success: `Submitted: ${data.name} (${data.email})` };
-};
-
-const handler = validatedAction(schema, action);
-
-// Example FormData:
-const formData = new FormData();
-formData.append("name", "John");
-formData.append("email", "john@example.com");
-
-handler({}, formData).then(console.log); // { success: "Submitted: John (john@example.com)" }
-
- */
