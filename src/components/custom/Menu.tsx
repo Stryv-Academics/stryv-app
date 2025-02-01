@@ -43,7 +43,7 @@ const menuSections = [
         visible: [Roles.ADMIN, Roles.TUTOR],
       },
       {
-        icon: "/resource.png",
+        icon: "/more.png",
         label: "Resources",
         action: "/resources",
         visible: [Roles.ADMIN, Roles.TUTOR],
@@ -128,7 +128,15 @@ export default function Menu({ userData }: { userData: Account }) {
                     className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
                     onClick={async () => await signOut()}
                   >
-                    <Image src={item.icon} alt={item.label} className="w-5 h-5" />
+                    <div className="relative w-5 h-5">
+                      <Image
+                        src={item.icon}
+                        alt={item.label}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+
                     <span className="text-sm">{item.label}</span>
                   </Button>
                 ) : (
@@ -139,11 +147,15 @@ export default function Menu({ userData }: { userData: Account }) {
                       className="w-full justify-start gap-2 text-gray-800 font-medium hover:text-blue-600 hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-2">
-                        <Image
-                          src={item.icon}
-                          alt={item.label}
-                          className="w-5 h-5"
-                        />
+                        <div className="relative w-5 h-5">
+                          <Image
+                            src={item.icon}
+                            alt={item.label}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+
                         <span className="text-sm">{item.label}</span>
                       </div>
                     </Button>
@@ -158,11 +170,15 @@ export default function Menu({ userData }: { userData: Account }) {
 
       {/* Profile Section */}
       <div className="flex items-center gap-4">
-        <Image
-          src="/avatar.png"
-          alt="Avatar"
-          className="rounded-full w-10 h-10"
-        />
+        <div className="relative w-10 h-10">
+          <Image
+            src="/avatar.png"
+            alt="Avatar"
+            fill
+            className="object-contain"
+          />
+        </div>
+
         <div>
           <p className="text-lg font-semibold leading-tight text-gray-900">
             {fullName}
