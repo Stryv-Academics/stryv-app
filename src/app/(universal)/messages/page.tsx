@@ -121,7 +121,7 @@ const MessagesPage = async () => {
             </div>
           </div>
           <div className="w-full lg:w-1/0 flex flex-col gap-4 px-14">
-            {conversations.map((conversation: any) => (
+            {conversations.map((conversation: any, index: number) => (
               <div key={conversation.conversation_id} className="flex items-center gap-4 w-full">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 shrink-0">
                   <img src={conversation.profilePicture || "/default-profile.png"}
