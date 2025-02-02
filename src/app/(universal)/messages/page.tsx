@@ -9,7 +9,10 @@ import { Card } from "@/components/ui/card";
 const MessagesPage = async () => {
   const supabase = await createClient();
 
-  const { data: { user }, error: userError, } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     console.error("Auth session missing or error fetching user:", userError);
@@ -20,18 +23,22 @@ const MessagesPage = async () => {
   function formatTime(dateString: any) {
     const date = new Date(dateString);
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
     const formattedDate = date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
     const startOfYesterday = new Date(startOfToday);
     startOfYesterday.setDate(startOfYesterday.getDate() - 1);
     if (startOfYesterday < date && date < startOfToday) {
-      return "Yesterday"
+      return "Yesterday";
     } else if (date < startOfToday) {
       return formattedDate;
     } else {
@@ -108,8 +115,12 @@ const MessagesPage = async () => {
           <div className="p-6 shrink-0">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center justify-start gap-2">
-                <Link href={`/`}>
-                  <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+                <Link href={"/"}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-gray-100"
+                  >
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
                 </Link>
@@ -124,12 +135,16 @@ const MessagesPage = async () => {
             {conversations.map((conversation: any, index: number) => (
               <div key={conversation.conversation_id} className="flex items-center gap-4 w-full">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 shrink-0">
-                  <img src={conversation.profilePicture || "/default-profile.png"}
+                  <img
+                    src={conversation.profilePicture || "/default-profile.png"}
                     alt={`${conversation.conversation_title}'s profile`}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <Link href={`/messages/${conversation.conversation_id}`} className="flex-1 min-w-0 max-w-full">
+                <Link
+                  href={`/messages/${conversation.conversation_id}`}
+                  className="flex-1 min-w-0 max-w-full"
+                >
                   <div
                     key={index}
                     className="p-4 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer bg-white shadow-xs border border-gray-200"
@@ -140,18 +155,29 @@ const MessagesPage = async () => {
                           {conversation.conversation_title}
                         </span>
                         {conversation.latest_message && (
-                          <p className="text-sm text-gray-500 truncate">{conversation.latest_message}</p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {conversation.latest_message}
+                          </p>
                         )}
                       </div>
                       <div className="shrink-0 flex flex-col gap-1 items-end">
                         {conversation.latest_message_created_at && (
-                          <p className={`text-xs ${conversation.unread_count > 0 ? "text-blue-600 font-bold" : "text-gray-500"}`}>
+                          <p
+                            className={`text-xs ${
+                              conversation.unread_count > 0
+                                ? "text-blue-600 font-bold"
+                                : "text-gray-500"
+                            }`}
+                          >
                             {formatTime(conversation.latest_message_created_at)}
                           </p>
                         )}
                         {conversation.unread_count > 0 && (
                           <div className="relative flex items-center justify-center w-6 h-6">
-                            <Circle fill="currentColor" className="text-blue-600 w-full h-full" />
+                            <Circle
+                              fill="currentColor"
+                              className="text-blue-600 w-full h-full"
+                            />
                             <span className="absolute text-sm text-white font-medium flex items-center justify-center leading-tight">
                               {conversation.unread_count}
                             </span>
