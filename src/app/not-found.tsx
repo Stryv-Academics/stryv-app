@@ -25,38 +25,38 @@ export default function NotFound() {
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
 
-          {/* Actions */}
-          <div className="mt-10 space-y-6">
-            {/* Go Home Button */}
-            <Button
-              onClick={() => router.push("/")} // Navigate to home page
-              className="w-full h-12 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Go Home
-            </Button>
+        {/* Actions */}
+        <div className="mt-10 space-y-6">
+          {/* Go Home Button */}
+          <Button
+            onClick={() => router.push("/")} // Navigate to home page
+            className="w-full h-12 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Go Home
+          </Button>
 
-            {/* Go Back Button */}
-            <Button
-              variant="outline"
-              onClick={() => router.back()} // Navigate to previous page
-              className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-xs transition-all hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Go Back
-            </Button>
-          </div>
-
-          {/* Additional Links */}
-          <p className="mt-8 text-sm text-center text-gray-600">
-            Need help? Visit our{" "}
-            <a
-              href="/contact-us"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Contact Page
-            </a>
-            .
-          </p>
+          {/* Go Back Button */}
+          <Button
+            variant="outline"
+            onClick={() => router.back()} // Navigate to previous page
+            className="w-full h-12 font-medium text-gray-700 bg-white rounded-lg border border-gray-200 shadow-xs transition-all hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Go Back
+          </Button>
         </div>
+
+        {/* Additional Links */}
+        <p className="mt-8 text-sm text-center text-gray-600">
+          Need help? Visit our{" "}
+          <a
+            href="/contact-us"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
+            Contact Page
+          </a>
+          .
+        </p>
       </div>
+    </div>
   );
 }
