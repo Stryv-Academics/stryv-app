@@ -35,7 +35,7 @@ interface ChatProps {
 
 interface GroupedMessages {
   [date: string]: MessageProp[];
-};
+}
 
 const formatDateTime = (isoString: string | null) => {
   if (!isoString) return "";
@@ -49,7 +49,11 @@ const formatDateTime = (isoString: string | null) => {
   });
 };
 
-const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps) => {
+const Chat = ({
+  initialMessages,
+  conversation_id,
+  conversation_name,
+}: ChatProps) => {
   const [messages, setMessages] = useState(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -122,7 +126,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const fileExtension = file?.name.split('.').pop()?.toLowerCase();
+    const fileExtension = file?.name.split(".").pop()?.toLowerCase();
 
     const tempMessage: MessageProp = {
       id: null,
@@ -130,7 +134,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       content: newMessage,
       message_type: fileExtension ? fileExtension : null,
       attachment_url: file ? URL.createObjectURL(file) : null, // Show local preview for file
-      attachment_name: file? file.name : null,
+      attachment_name: file ? file.name : null,
       created_at: new Date().toISOString(),
       sender_id: userId,
       first_name: null, // not necessary for user's own message
@@ -148,7 +152,10 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       .select("first_name")
       .eq("id", userId);
     if (profileError || !profile) {
-      console.error("Error fetching profile:", profileError || "No profile found");
+      console.error(
+        "Error fetching profile:",
+        profileError || "No profile found"
+      );
       return;
     }
 
@@ -166,7 +173,10 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                 message_type = "video";
             } */ else if (type === "application/pdf") {
         message_type = "pdf";
-      } else if (type ==="application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      } else if (
+        type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
         message_type = "docx";
       }
 
@@ -196,11 +206,14 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       }
 
       const { data: updateData, error: updateError } = await supabase
-          .from("conversations")
-          .update({"updated_at": new Date().toISOString()})
-          .eq("id", conversation_id);
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conversation_id);
       if (updateError) {
-        console.error("Error in updating time new message is sent:", updateError.message);
+        console.error(
+          "Error in updating time new message is sent:",
+          updateError.message
+        );
       }
 
       const eventData = {
@@ -236,13 +249,13 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       } else if (date.getFullYear() === currentYear) {
         dateFormatted = date.toLocaleDateString(undefined, {
           month: "long",
-          day: "numeric"
+          day: "numeric",
         });
       } else {
         dateFormatted = date.toLocaleDateString(undefined, {
           month: "long",
           day: "numeric",
-          year: "numeric"
+          year: "numeric",
         });
       }
       if (!acc[dateFormatted]) {
@@ -257,41 +270,45 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
 
   function formatTime(dateString: any) {
     const date = new Date(dateString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
 
     return `${hours}:${minutes}`;
   }
 
   useEffect(() => {
     if (messagesEndRef) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "auto",
+        block: "end",
+      });
     }
   }, [groupedMessages]);
 
   const markMessageAsRead = async (message_id: string | null) => {
-    const { error } = await supabase
-        .from("message_reads")
-        .upsert([
-            {
-                message_id,
-                user_id: userId,
-                read_at: new Date().toISOString(),
-            },
-        ], {
-          onConflict: "user_id,message_id",
-          ignoreDuplicates: true
-        });
+    const { error } = await supabase.from("message_reads").upsert(
+      [
+        {
+          message_id,
+          user_id: userId,
+          read_at: new Date().toISOString(),
+        },
+      ],
+      {
+        onConflict: "user_id,message_id",
+        ignoreDuplicates: true,
+      }
+    );
 
     if (error) {
-        console.error("Error marking message as read:", error);
+      console.error("Error marking message as read:", error);
     } else {
-        // Update the local state to reflect the read status
-        setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-                msg.id === message_id ? { ...msg, read: true } : msg
-            )
-        );
+      // Update the local state to reflect the read status
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === message_id ? { ...msg, read: true } : msg
+        )
+      );
     }
   };
   //console.log(userId);
@@ -300,10 +317,12 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       return;
     }
     const markMessagesAsRead = async () => {
-        const unreadMessages = messages.filter((message) => !message.read && message.sender_id !== userId);
-        for (const message of unreadMessages) {
-            await markMessageAsRead(message.id);
-        }
+      const unreadMessages = messages.filter(
+        (message) => !message.read && message.sender_id !== userId
+      );
+      for (const message of unreadMessages) {
+        await markMessageAsRead(message.id);
+      }
     };
     markMessagesAsRead();
   }, [messages, userId]);
@@ -318,13 +337,15 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
     const selectedFile = e.target.files ? e.target.files[0] : null;
     if (selectedFile) {
       if (selectedFile.size > MAX_FILE_SIZE) {
-        alert(`File size exceeds the limit of 1MB. Please select a smaller file.`);
+        alert(
+          "File size exceeds the limit of 1MB. Please select a smaller file."
+        );
         e.target.value = "";
         return;
       }
-  
+
       setFile(selectedFile);
-  
+
       if (selectedFile.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -340,7 +361,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
 
   const handleTextChange = (e: any) => {
     setNewMessage(e.target.value);
-    e.target.style.height = '1.5rem';
+    e.target.style.height = "1.5rem";
     if (e.target.scrollHeight > e.target.clientHeight) {
       e.target.style.height = `${e.target.scrollHeight}px`;
     }
@@ -359,7 +380,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
         <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <Link href={`/messages`}>
+            <Link href={"/messages"}>
               <Button variant="ghost" size="sm" className="hover:bg-gray-100">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -372,17 +393,27 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
           {Object.entries(groupedMessages).map(([date, msgs]) => (
             <div key={date}>
-              <div className="text-center text-gray-500 text-sm font-medium mb-4">{date}</div>
+              <div className="text-center text-gray-500 text-sm font-medium mb-4">
+                {date}
+              </div>
               {msgs.map((msg, index) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.current_user_is_sender ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    msg.current_user_is_sender ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[70%] rounded-lg p-3 ${
-                      msg.current_user_is_sender ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
+                      msg.current_user_is_sender
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-900"
+                    }`}
                     style={{
-                      marginTop: index > 0 && msgs[index - 1].current_user_is_sender ? '0.15rem' : '0.5rem',
+                      marginTop:
+                        index > 0 && msgs[index - 1].current_user_is_sender
+                          ? "0.15rem"
+                          : "0.5rem",
                     }}
                   >
                     {msg.message_type === "image" && msg.attachment_url && (
@@ -408,19 +439,33 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                                             </video>
                                         </div>
                                     )} */}
-                    {(msg.message_type === "pdf" || msg.message_type === "docx") && msg.attachment_url && (
-                      <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
-                      >
-                        <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                          <File className="w-4 h-4" />
-                        </div>
-                        <span>
-                          {msg.attachment_name || msg.attachment_url.split("-").pop()}
-                        </span>
-                      </a>
-                    )}
-                    <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
+                    {(msg.message_type === "pdf" ||
+                      msg.message_type === "docx") &&
+                      msg.attachment_url && (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
+                        >
+                          <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
+                            <File className="w-4 h-4" />
+                          </div>
+                          <span>
+                            {msg.attachment_name ||
+                              msg.attachment_url.split("-").pop()}
+                          </span>
+                        </a>
+                      )}
+                    <p
+                      className={`text-m ${
+                        msg.message_type !== "text" && msg.attachment_url
+                          ? "pt-2"
+                          : ""
+                      }`}
+                    >
+                      {msg.content}
+                    </p>
                     <span className="text-xs block opacity-70 text-right">
                       <i className="block text-sm select-none">
                         {msg?.created_at ? formatTime(msg.created_at) : ""}
@@ -428,13 +473,17 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                     </span>
                   </div>
                 </div>
-                ))}
+              ))}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-2 w-full"
+            style={{ height: "auto" }}
+          >
             <Input
               type="file"
               accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
@@ -452,19 +501,30 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
             <div className="grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
               {imagePreview && (
                 <div className="relative">
-                  <img src={imagePreview} alt="Image preview"
+                  <img
+                    src={imagePreview}
+                    alt="Image preview"
                     className="max-w-[200px] h-auto mt-2 mb-2 object-contain border rounded cursor-pointer"
                   />
-                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                  <X
+                    className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2"
+                    onClick={removeFilePreview}
+                  />
                 </div>
               )}
-              {file && (file.type === "application/pdf" || file.name.endsWith(".pdf") || file.name.endsWith(".docx")) && (
-                <div className="relative mt-2 mb-2 p-2 border rounded bg-white flex items-center">
-                  <File className="w-4 h-4 mr-2" />
-                  <span className="text-gray-700">{file.name}</span>
-                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
-                </div>
-              )}
+              {file &&
+                (file.type === "application/pdf" ||
+                  file.name.endsWith(".pdf") ||
+                  file.name.endsWith(".docx")) && (
+                  <div className="relative mt-2 mb-2 p-2 border rounded bg-white flex items-center">
+                    <File className="w-4 h-4 mr-2" />
+                    <span className="text-gray-700">{file.name}</span>
+                    <X
+                      className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2"
+                      onClick={removeFilePreview}
+                    />
+                  </div>
+                )}
               <textarea
                 ref={textareaRef}
                 value={newMessage}
@@ -501,10 +561,19 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
           </form>
         </div>
         {selectedImage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
-          onClick={closeModal}>
-            <img src={selectedImage} alt="Expanded image" className="max-w-[80vw] max-h-[80vh] object-contain rounded" />
-            <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7" onClick={closeModal} />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+            onClick={closeModal}
+          >
+            <img
+              src={selectedImage}
+              alt="Expanded image"
+              className="max-w-[80vw] max-h-[80vh] object-contain rounded"
+            />
+            <X
+              className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7"
+              onClick={closeModal}
+            />
           </div>
         )}
       </div>
@@ -514,7 +583,7 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
       <div className="h-full flex flex-col max-h-screen overflow-hidden bg-white">
         <div className="flex-none sticky top-0 z-10 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <Link href={`/messages`}>
+            <Link href={"/messages"}>
               <Button variant="ghost" size="sm" className="hover:bg-gray-100">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -527,33 +596,44 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
           {Object.entries(groupedMessages).map(([date, msgs]) => (
             <div key={date}>
-              <div className="text-center text-gray-500 text-sm font-medium mb-4">{date}</div>
-            {msgs.map((msg, index) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.current_user_is_sender ? "justify-end" : "justify-start"}`}
-              >
+              <div className="text-center text-gray-500 text-sm font-medium mb-4">
+                {date}
+              </div>
+              {msgs.map((msg, index) => (
                 <div
-                  className={`max-w-[70%] rounded-lg p-3 ${msg.current_user_is_sender ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
-                  style={{
-                    marginTop: index > 0 && msgs[index - 1].current_user_is_sender ? '0.15rem' : '0.5rem',
-                  }}
+                  key={msg.id}
+                  className={`flex ${
+                    msg.current_user_is_sender ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  {msg.sender_id !== userId && (
-                    <strong>{msg?.first_name || "Anonymous"}</strong>
-                  )}
-                  {msg.message_type === "image" && msg.attachment_url && (
-                    <div className="mt-2 relative group cursor-pointer">
-                      <img
-                        src={msg.attachment_url}
-                        alt={msg.attachment_url.split("-").pop()}
-                        className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
-                        onClick={() => setSelectedImage(msg.attachment_url)}
-                      />
-                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
-                    </div>
-                  )}
-                  {/* {msg.message_type === "video" && msg.attachment_url && (
+                  <div
+                    className={`max-w-[70%] rounded-lg p-3 ${
+                      msg.current_user_is_sender
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-900"
+                    }`}
+                    style={{
+                      marginTop:
+                        index > 0 && msgs[index - 1].current_user_is_sender
+                          ? "0.15rem"
+                          : "0.5rem",
+                    }}
+                  >
+                    {msg.sender_id !== userId && (
+                      <strong>{msg?.first_name || "Anonymous"}</strong>
+                    )}
+                    {msg.message_type === "image" && msg.attachment_url && (
+                      <div className="mt-2 relative group cursor-pointer">
+                        <img
+                          src={msg.attachment_url}
+                          alt={msg.attachment_url.split("-").pop()}
+                          className="max-w-full max-h-[30vh] p--3 object-contain border rounded cursor-pointed"
+                          onClick={() => setSelectedImage(msg.attachment_url)}
+                        />
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity rounded pointer-events-none"></div>
+                      </div>
+                    )}
+                    {/* {msg.message_type === "video" && msg.attachment_url && (
                                       <div className="mt-2">
                                           <video
                                               controls
@@ -565,40 +645,58 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
                                           </video>
                                       </div>
                                   )} */}
-                  {(msg.message_type === "pdf" || msg.message_type === "docx") && msg.attachment_url && (
-                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
+                    {(msg.message_type === "pdf" ||
+                      msg.message_type === "docx") &&
+                      msg.attachment_url && (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg text-gray-900 underline"
+                        >
+                          <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
+                            <File className="w-4 h-4" />
+                          </div>
+                          <span>
+                            {msg.attachment_name ||
+                              msg.attachment_url.split("-").pop()}
+                          </span>
+                        </a>
+                      )}
+                    <p
+                      className={`text-m ${
+                        msg.message_type !== "text" && msg.attachment_url
+                          ? "pt-2"
+                          : ""
+                      }`}
                     >
-                      <div className="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
-                        <File className="w-4 h-4" />
-                      </div>
-                      <span>
-                        {msg.attachment_name || msg.attachment_url.split("-").pop()}
-                      </span>
-                    </a>
-                  )}
-                  <p className={`text-m ${msg.message_type !== "text" && msg.attachment_url ? "pt-2" : ""}`}>{msg.content}</p>
-                  <span className="text-xs block opacity-70 text-right">
-                    <i className="block text-sm select-none">
-                      {msg?.created_at ? formatTime(msg.created_at) : ""}
-                    </i>
-                  </span>
+                      {msg.content}
+                    </p>
+                    <span className="text-xs block opacity-70 text-right">
+                      <i className="block text-sm select-none">
+                        {msg?.created_at ? formatTime(msg.created_at) : ""}
+                      </i>
+                    </span>
+                  </div>
                 </div>
-              </div>
               ))}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
         <div className="flex-none sticky bottom-0 z-10 bg-gray-50 border-t p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full" style={{ height: "auto" }}>
-          <Input
-            type="file"
-            accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
-            onChange={handleFileChange}
-            ref={fileInputRef}
-            className="hidden"
-          />
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-2 w-full"
+            style={{ height: "auto" }}
+          >
+            <Input
+              type="file"
+              accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.pdf,.docx"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className="hidden"
+            />
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -609,19 +707,30 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
             <div className="grow p-2 border rounded resize-none overflow-hidden min-h-[2.5rem] max-h-[10rem] relative">
               {imagePreview && (
                 <div className="relative">
-                  <img src={imagePreview} alt="Image preview"
+                  <img
+                    src={imagePreview}
+                    alt="Image preview"
                     className="max-w-[200px] h-auto mt-2 mb-2 object-contain border rounded cursor-pointer"
                   />
-                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
+                  <X
+                    className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2"
+                    onClick={removeFilePreview}
+                  />
                 </div>
               )}
-              {file && (file.type === "application/pdf" || file.name.endsWith(".pdf") || file.name.endsWith(".docx")) && (
-                <div className="relative mt-2 mb-2 p-2 border rounded bg-white flex items-center">
-                  <File className="w-4 h-4 mr-2" />
-                  <span className="text-gray-700">{file.name}</span>
-                  <X className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2" onClick={removeFilePreview} />
-                </div>
-              )}
+              {file &&
+                (file.type === "application/pdf" ||
+                  file.name.endsWith(".pdf") ||
+                  file.name.endsWith(".docx")) && (
+                  <div className="relative mt-2 mb-2 p-2 border rounded bg-white flex items-center">
+                    <File className="w-4 h-4 mr-2" />
+                    <span className="text-gray-700">{file.name}</span>
+                    <X
+                      className="w-8 h-8 text-gray-500 cursor-pointer absolute top-1/2 right-0 transform -translate-y-1/2"
+                      onClick={removeFilePreview}
+                    />
+                  </div>
+                )}
               <textarea
                 ref={textareaRef}
                 value={newMessage}
@@ -658,10 +767,19 @@ const Chat = ({ initialMessages, conversation_id, conversation_name }: ChatProps
           </form>
         </div>
         {selectedImage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
-          onClick={closeModal}>
-            <img src={selectedImage} alt="Expanded image" className="max-w-[80vw] max-h-[80vh] object-contain rounded" />
-            <X className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7" onClick={closeModal} />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+            onClick={closeModal}
+          >
+            <img
+              src={selectedImage}
+              alt="Expanded image"
+              className="max-w-[80vw] max-h-[80vh] object-contain rounded"
+            />
+            <X
+              className="w-8 h-8 text-gray-200 cursor-pointer absolute top-7 right-7"
+              onClick={closeModal}
+            />
           </div>
         )}
       </div>

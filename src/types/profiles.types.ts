@@ -10,9 +10,13 @@ export interface Student extends Account {
 
 // Tutor Profile
 export interface Tutor extends Account {
-  specialties: string[];
-  years_of_experience: number;
-  certifications?: string[];
+  subjects: string[];
+  bio: string;
+  qualifications: string;
+  tutoring_approach: string;
+  tutoring_experience: string;
+  current_education: string;
+  location: string;
 }
 
 // Parent Profile
