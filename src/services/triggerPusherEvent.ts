@@ -1,7 +1,7 @@
 export const triggerPusherEvent = async (
   channel: string,
   event: string,
-  data: any
+  data: unknown //data is of type unknown but is not used, hence no error
 ) => {
   try {
     console.time("Send message execution time");

@@ -9,7 +9,7 @@ const uploadFile = async (file: File) => {
   }
   const file_path = `${Date.now()}-${file.name}`;
 
-  const { data, error } = await supabase.storage
+  const { /*data, not used but could be useful in display for file name*/ error } = await supabase.storage
     .from("attachments")
     .upload(file_path, file);
   if (error) {

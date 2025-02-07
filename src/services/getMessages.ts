@@ -63,7 +63,7 @@ export const fetchMessages = async (
     return messagesWithReadStatus;
   } else {
     const messagesWithFirstNames = await Promise.all(
-      messagesWithReadStatus.map(async (msg: any) => {
+      messagesWithReadStatus.map(async (msg: typeof messagesWithReadStatus[number]) => {
         const { data: profiles, error } = await supabase
           .from("accounts")
           .select("first_name")
