@@ -2,10 +2,6 @@ import { createClient } from "@/utils/supabase/server";
 
 const getConversationName = async (conversation_id: string) => {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
 
   const { data: conversationData, error: conversationError } = await supabase
     .from("conversations")
@@ -24,10 +20,17 @@ const getConversationName = async (conversation_id: string) => {
         .from("conversation_participants")
         .select("user_id")
         .eq("conversation_id", conversation_id);
-    const { data: accountData, error: accountError } = await supabase
-      .from("accounts")
-      .select("first_name")
-      .eq("id", privateConversationData?.[0].user_id);
+      if (privateConversationError) {
+        console.log("Error in fetching private conversation: ", privateConversationError);
+      }
+    const { data: accountData, error: accountError } = 
+      await supabase
+        .from("accounts")
+        .select("first_name")
+        .eq("id", privateConversationData?.[0].user_id);
+      if (accountError) {
+        console.log("Error in fetching account data: ", accountError);
+      }
     return accountData?.[0]?.first_name;
   } else {
     return conversationData?.[0]?.title || "Untitled Conversation";

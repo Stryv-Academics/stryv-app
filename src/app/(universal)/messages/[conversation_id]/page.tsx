@@ -1,3 +1,4 @@
+import React from "react";
 import { fetchMessages } from "@/services/getMessages";
 import getConversationName from "@/services/getConversationName";
 import Chat from "@/components/custom/Chat";
