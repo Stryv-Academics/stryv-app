@@ -12,6 +12,9 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: ["src/components/ui/*", "src/components/lama/*"],
+  },
   ...compat.config({
     extends: ["next/core-web-vitals", "next/typescript", "next", "prettier"],
     rules: {
