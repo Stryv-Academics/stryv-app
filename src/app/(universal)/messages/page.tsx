@@ -1,6 +1,7 @@
 import React from "react";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import Image from "next/image";
 import fetchUnreadCounts from "@/services/getUnreadMessages";
 
 import { MessageSquare, ArrowLeft, Circle } from "lucide-react";
@@ -142,12 +143,21 @@ const MessagesPage = async () => {
                   className="flex items-center gap-4 w-full"
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 shrink-0">
-                    <img
+                    {/* <img
                       src={
                         conversation.profilePicture || "/default-profile.png"
                       }
                       alt={`${conversation.conversation_title}'s profile`}
                       className="w-full h-full object-cover"
+                    /> */}
+                    <Image
+                      src={
+                        conversation.profilePicture || "/default-profile.png"
+                      }
+                      alt={`${conversation.conversation_title}'s profile`}
+                      fill
+                      style={{ objectFit: "cover" }} // Equivalent to "object-cover"
+                      className="w-full h-full"
                     />
                   </div>
                   <Link
